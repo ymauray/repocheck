@@ -16,6 +16,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | META-06 | `.gitignore` adapté au langage | 🟡 | Évite de committer des artefacts de build ou fichiers locaux. |
 | META-07 | `.editorconfig` présent | 🟡 | Garantit un style de code cohérent entre éditeurs/contributeurs. |
 | META-08 | Badges de statut dans le README (build, licence, version...) | ⚪ | Repère visuel rapide de l'état du projet, purement cosmétique — sans impact sur la qualité ou la sécurité. |
+| META-09 | Le README documente la chaîne CI/CD réelle, outils externes compris | 🟡 | Une release assurée par un outil externe (Xcode Cloud, Codemagic, Bitrise...) ne laisse aucune trace vérifiable via `gh api` : sans mention dans le README, un lecteur — humain ou automatique — conclut à tort que le projet n'a ni intégration continue ni release. Vaut aussi pour la frontière entre ce que fait la CI du dépôt et ce que fait l'outil externe. |
 
 ## Fichiers communautaires / gouvernance
 
@@ -40,6 +41,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | CI-04 | Actions tierces épinglées à un SHA (pas juste un tag mouvant) | 🟡 | Un tag `@vN` peut être déplacé par le mainteneur de l'action ; un SHA garantit l'immuabilité, surtout sur un workflow avec des secrets. |
 | CI-05 | Release automatisée avec versioning sémantique | 🟡 | Facilite la traçabilité des versions publiées. |
 | CI-06 | Cohérence des tags Git (uniquement `vX.Y.Z`) | 🟡 | Un tag hors format semver pollue l'historique des releases. |
+| CI-07 | Permissions par défaut des workflows en lecture seule (`default_workflow_permissions: read`) | 🟠 | Réglage unique au niveau du dépôt, qui couvre tous les workflows *y compris ceux à venir* — là où CI-03 se vérifie fichier par fichier. L'ancien défaut GitHub (`write` + `can_approve_pull_request_reviews`) donne à tout workflow un droit d'écriture sur le dépôt et le pouvoir d'approuver des PR. |
 
 ## Protection de branche
 
@@ -65,7 +67,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 
 | ID | Pratique | Criticité | Commentaire |
 |---|---|---|---|
-| TOOL-01 | Fichier d'instructions IA au bon emplacement (`CLAUDE.md`, `.github/copilot-instructions.md`, `GEMINI.md`, selon l'outil utilisé) | 🟠 | Un fichier mal placé (ex. Copilot à la racine au lieu de `.github/`) est ignoré silencieusement par l'outil — vérifier l'emplacement canonique de chaque assistant IA réellement utilisé dans le repo. |
+| TOOL-01 | Fichier d'instructions IA présent et au bon emplacement (`CLAUDE.md`, `.github/copilot-instructions.md`, `GEMINI.md`, selon l'outil utilisé) | 🟠 | Attendu sur **tout** dépôt : l'absence de fichier d'instructions vaut `KO`, jamais `NA`. Un fichier mal placé (ex. Copilot à la racine au lieu de `.github/`) est ignoré silencieusement par l'outil — vérifier l'emplacement canonique de chaque assistant IA réellement utilisé dans le repo. |
 
 ---
 
