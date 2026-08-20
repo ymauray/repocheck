@@ -7,6 +7,18 @@
     résultats par dépôt (github-audits.csv) pour produire un rapport
     Markdown par dépôt.
 
+.PARAMETER Audit
+    Interroge GitHub via `gh` pour évaluer les pratiques du catalogue sur
+    les dépôts passés à -Repo, et met à jour la matrice de résultats.
+    Seules les pratiques disposant d'un évaluateur sont écrites ; les
+    autres colonnes sont laissées inchangées, de même que la colonne
+    Notes.
+
+.PARAMETER SnapshotCacheDir
+    Dossier de cache des instantanés collectés par -Audit. S'il est
+    fourni, un instantané déjà présent y est relu au lieu de réinterroger
+    GitHub — utile pour rejouer une évaluation hors ligne.
+
 .PARAMETER Reports
     Génère un fichier de rapport Markdown par dépôt (un fichier par ligne
     du CSV) dans -OutputDir.
@@ -36,16 +48,27 @@
     du script.
 
 .EXAMPLE
+    ./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo
+
+.EXAMPLE
     ./Invoke-RepoCheck.ps1 -Reports
 
 .EXAMPLE
+    ./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo
+
+.EXAMPLE
     ./Invoke-RepoCheck.ps1 -Reports -Summary
+
+.EXAMPLE
+    ./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo
 
 .EXAMPLE
     ./Invoke-RepoCheck.ps1 -Reports -Repo owner/repo
 #>
 [CmdletBinding()]
 param(
+    [switch]$Audit,
+
     [switch]$Reports,
 
     [switch]$Summary,
@@ -58,7 +81,9 @@ param(
 
     [string]$OutputDir = (Join-Path $PSScriptRoot 'reports'),
 
-    [string]$SummaryPath = (Join-Path $PSScriptRoot 'github-audits-summary.md')
+    [string]$SummaryPath = (Join-Path $PSScriptRoot 'github-audits-summary.md'),
+
+    [string]$SnapshotCacheDir
 )
 
 $ErrorActionPreference = 'Stop'
@@ -81,6 +106,23 @@ $StatusSymbol = @{
     'OK' = '✅'
     'KO' = '❌'
     'NA' = '➖'
+}
+
+function Split-CommaList {
+    # Via `pwsh -File`, un paramètre [string[]] reçoit « a,b » comme une seule
+    # chaîne : on redécoupe pour accepter les deux formes.
+    [CmdletBinding()]
+    param([string[]]$Value)
+
+    $result = [System.Collections.Generic.List[string]]::new()
+    foreach ($item in $Value) {
+        foreach ($part in ($item -split ',')) {
+            $trimmed = $part.Trim()
+            if ($trimmed) { $result.Add($trimmed) }
+        }
+    }
+
+    return $result.ToArray()
 }
 
 function Read-Catalog {
@@ -288,6 +330,33 @@ function New-SummaryReport {
 
 $catalogEntries = Read-Catalog -Path $CatalogPath
 
+if ($Repo) {
+    $Repo = Split-CommaList -Value $Repo
+}
+
+if (-not $Audit -and -not $Reports -and -not $Summary) {
+    Write-Host "Aucune action demandée. Utilisez -Audit, -Reports et/ou -Summary."
+    return
+}
+
+if ($Audit) {
+    if (-not $Repo) {
+        throw "-Audit exige -Repo (ex: ./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo)."
+    }
+
+    $auditDir = Join-Path $PSScriptRoot 'Audit'
+    . (Join-Path $auditDir 'Get-RepoSnapshot.ps1')
+    . (Join-Path $auditDir 'PracticeEvaluators.ps1')
+    . (Join-Path $auditDir 'Invoke-RepoAudit.ps1')
+
+    Invoke-RepoAudit -Repo $Repo -CatalogEntries $catalogEntries -CsvPath $CsvPath `
+        -Evaluators $PracticeEvaluators -CacheDir $SnapshotCacheDir
+}
+
+if (-not $Reports -and -not $Summary) {
+    return
+}
+
 if (-not (Test-Path -LiteralPath $CsvPath)) {
     throw "Matrice de résultats introuvable : $CsvPath"
 }
@@ -298,11 +367,6 @@ if ($Repo) {
     if (-not $auditRows) {
         throw "Aucun dépôt correspondant dans $CsvPath pour : $($Repo -join ', ')"
     }
-}
-
-if (-not $Reports -and -not $Summary) {
-    Write-Host "Aucune action demandée. Utilisez -Reports et/ou -Summary."
-    return
 }
 
 $repoReports = foreach ($row in $auditRows) {
