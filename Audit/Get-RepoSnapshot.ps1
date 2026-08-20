@@ -109,7 +109,7 @@ function Get-RepoSnapshot {
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 3
+    $schemaVersion = 4
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -174,6 +174,23 @@ function Get-RepoSnapshot {
         })
     }
 
+    # security_and_analysis n'est pas expose par `gh repo view --json` : il faut
+    # passer par l'API REST. Il vaut null sur un depot prive en plan gratuit, ou
+    # le secret scanning n'est pas offert -- l'equivalent du 403 de la protection
+    # de branche.
+    $repoApi = Invoke-GhJson -Arguments @('api', "repos/$Repo")
+
+    # 204 = alertes activees, 404 = desactivees. L'endpoint n'a pas de corps.
+    $alertsResponse = Invoke-GhApiResponse -Endpoint "repos/$Repo/vulnerability-alerts"
+
+    $automatedFixes = Invoke-GhJson -Arguments @('api', "repos/$Repo/automated-security-fixes")
+
+    $security = [pscustomobject]@{
+        Analysis                 = $repoApi.security_and_analysis
+        VulnerabilityAlertStatus = $alertsResponse.Status
+        AutomatedFixesEnabled    = [bool]($automatedFixes -and $automatedFixes.enabled)
+    }
+
     $snapshot = [pscustomobject]@{
         Repo          = $Repo
         SchemaVersion = $schemaVersion
@@ -182,6 +199,7 @@ function Get-RepoSnapshot {
         Contents      = $contents
         Protection    = $protection
         Collaborators = $collaborators
+        Security      = $security
     }
 
     if ($cacheFile) {
