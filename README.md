@@ -70,7 +70,7 @@ Dependabot surveille les versions des actions GitHub ([`dependabot.yml`](.github
 
 ## Statut
 
-`github-audits.csv` est aujourd'hui rempli manuellement à partir d'un audit via `gh api`. Une prochaine étape consiste à automatiser cet audit (mode `-Audit`) puis à appliquer des corrections sûres (mode `-Fix`).
+Le catalogue de pratiques est stabilisé à 35 entrées, après l'audit manuel de 14 dépôts. `github-audits.csv` est encore rempli à la main : le mode `-Audit`, qui automatisera cette collecte via `gh api`, est en cours d'implémentation. Un mode `-Fix`, appliquant les corrections sûres (réglages GitHub, pas de réécriture de code), suivra.
 
 ## Licence
 
