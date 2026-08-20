@@ -96,6 +96,44 @@ function Get-RepoDirectoryEntries {
     return , $entries
 }
 
+function Get-RepoWorkflow {
+    <#
+        Telecharge le contenu de chaque workflow de .github/workflows.
+
+        Un seul listing puis un appel par fichier : les depots du parc en ont
+        entre zero et deux. La distinction « aucun workflow » / « des workflows
+        sans le reglage attendu » compte, car elle separe un NA d'un KO.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Repo
+    )
+
+    # L'affectation intermediaire n'est pas cosmetique : Get-RepoDirectoryEntries
+    # retourne « , $tableau » pour empecher le deroulement d'un tableau vide, et
+    # consommer ce retour DIRECTEMENT dans un pipeline envoie tout le tableau
+    # comme un seul element. Passer par une variable retablit le deroulement.
+    $entries = Get-RepoDirectoryEntries -Repo $Repo -Path '.github/workflows'
+    $files = @($entries | Where-Object { $_ -and $_.Type -eq 'file' -and $_.Name -match '\.ya?ml$' })
+
+    $workflows = @()
+    foreach ($file in $files) {
+        $payload = Invoke-GhJson -Arguments @('api', "repos/$Repo/contents/.github/workflows/$($file.Name)")
+        if (-not $payload -or -not $payload.content) { continue }
+
+        # GitHub renvoie du base64 entrecoupe de sauts de ligne.
+        $clean = ($payload.content -replace '\s', '')
+        $text = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($clean))
+
+        $workflows += [pscustomobject]@{
+            Name    = $file.Name
+            Content = $text
+        }
+    }
+
+    return , $workflows
+}
+
 function Get-RepoSnapshot {
     [CmdletBinding()]
     param(
@@ -109,7 +147,7 @@ function Get-RepoSnapshot {
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 4
+    $schemaVersion = 5
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -191,6 +229,8 @@ function Get-RepoSnapshot {
         AutomatedFixesEnabled    = [bool]($automatedFixes -and $automatedFixes.enabled)
     }
 
+    $workflows = Get-RepoWorkflow -Repo $Repo
+
     $snapshot = [pscustomobject]@{
         Repo          = $Repo
         SchemaVersion = $schemaVersion
@@ -200,6 +240,7 @@ function Get-RepoSnapshot {
         Protection    = $protection
         Collaborators = $collaborators
         Security      = $security
+        Workflows     = $workflows
     }
 
     if ($cacheFile) {
