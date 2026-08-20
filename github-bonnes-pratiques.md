@@ -76,3 +76,16 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 - Statuts possibles dans `github-audits.csv` : `OK` (respectée), `KO` (non respectée), `NA` (non applicable à ce dépôt, ex. BR-04 en solo).
 - Un score par dépôt sera calculé (pondéré par criticité) directement depuis le CSV plutôt que maintenu à la main.
 - Points encore à trancher avant d'écrire le script : méthode de merge à standardiser (squash seul ?), faut-il un `CODE_OF_CONDUCT.md` systématique.
+
+### Dépôts privés : distinguer « non fait » de « impossible »
+
+Sur un dépôt privé en plan gratuit, plusieurs pratiques ne sont pas seulement désactivées : elles sont **indisponibles**. L'API le signale distinctement, et `-Audit` doit s'appuyer sur cette différence plutôt que sur le seul échec de l'appel :
+
+| Signal `gh api` | Dépôt public | Dépôt privé (plan gratuit) |
+|---|---|---|
+| `branches/{branch}/protection` | `404` — branche non protégée | `403` — « Upgrade to GitHub Pro » |
+| `security_and_analysis` | objet de statuts (`enabled`/`disabled`) | `null` |
+
+Pratiques concernées : protection de branche et application aux administrateurs, required status checks, secret scanning et sa push protection.
+
+**Convention retenue : `KO`, pas `NA`.** La visibilité d'un dépôt est un choix réversible, et publier un dépôt suffit à rendre ces fonctionnalités disponibles gratuitement — l'écart reste donc réel et corrigeable. Les passer en `NA` les exclurait du score et donnerait mécaniquement une meilleure note à un dépôt privé qu'à un dépôt public identique, ce qui inverserait le message. La note du dépôt dans le CSV doit en revanche préciser la cause, pour qu'on ne lise pas ces `KO` comme de la négligence.
