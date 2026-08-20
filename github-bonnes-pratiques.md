@@ -15,6 +15,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | META-05 | Homepage URL renseignée | ⚪ | Utile seulement si un site/doc dédié existe. |
 | META-06 | `.gitignore` adapté au langage | 🟡 | Évite de committer des artefacts de build ou fichiers locaux. |
 | META-07 | `.editorconfig` présent | 🟡 | Garantit un style de code cohérent entre éditeurs/contributeurs. |
+| META-08 | Badges de statut dans le README (build, licence, version...) | ⚪ | Repère visuel rapide de l'état du projet, purement cosmétique — sans impact sur la qualité ou la sécurité. |
 
 ## Fichiers communautaires / gouvernance
 
@@ -27,6 +28,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | GOV-05 | Template de pull request | 🟡 | Rappelle une checklist (tests, changelog...) à chaque PR. |
 | GOV-06 | `CODEOWNERS` | ⚪ | Peu utile en mainteneur unique, pertinent si des reviewers dédiés apparaissent. |
 | GOV-07 | Discussions activées | ⚪ | Pertinent seulement si un canal Q&A/communauté est souhaité. |
+| GOV-08 | `SUPPORT.md` (où obtenir de l'aide) | 🟡 | Fichier communautaire reconnu par GitHub (Insights → Community Standards), distinct de `CONTRIBUTING`/`SECURITY` — indique où poser des questions plutôt que d'ouvrir une issue. |
 
 ## CI/CD et releases
 
