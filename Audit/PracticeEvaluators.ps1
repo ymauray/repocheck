@@ -125,6 +125,40 @@ function Get-SecurityFeatureState {
     return $entry.status
 }
 
+function Get-WorkflowActionReference {
+    <#
+        Extrait les references `uses:` d'un workflow, en ignorant les actions
+        locales (./...) et les images docker, qui ne sont pas des actions du
+        Marketplace et ne s'epinglent pas de la meme facon.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Content
+    )
+
+    $references = [System.Collections.Generic.List[pscustomobject]]::new()
+
+    foreach ($match in [regex]::Matches($Content, '(?m)^\s*(?:-\s*)?uses:\s*([^\s#]+)')) {
+        $reference = $match.Groups[1].Value.Trim("'", '"')
+        if ($reference.StartsWith('.') -or $reference.StartsWith('docker://')) { continue }
+
+        $owner = ($reference -split '/')[0]
+        $ref = ''
+        if ($reference -match '@(.+)$') { $ref = $Matches[1] }
+
+        $references.Add([pscustomobject]@{
+            Reference = $reference
+            Owner     = $owner
+            Ref       = $ref
+            # Un SHA de commit fait 40 caracteres hexadecimaux ; tout le reste
+            # est un tag ou une branche, donc deplacable.
+            IsPinned  = ($ref -match '^[0-9a-f]{40}$')
+        })
+    }
+
+    return , $references.ToArray()
+}
+
 $PracticeEvaluators = @{
 
     # META-01 -- Description du dépôt renseignée.
@@ -496,5 +530,59 @@ $PracticeEvaluators = @{
         }
 
         return New-PracticeResult -Status 'KO' -Note 'SEC-05: push protection desactivee'
+    }
+
+    # CI-03 -- Bloc permissions: explicite dans chaque workflow.
+    # Le script verifie l'explicitation, pas la minimalite : juger qu'une
+    # permission est plus large que necessaire suppose de savoir ce que fait le
+    # workflow, ce qui n'est pas deductible du YAML.
+    'CI-03' = {
+        param($Snapshot)
+
+        $workflows = @($Snapshot.Workflows | Where-Object { $_ })
+        if ($workflows.Count -eq 0) {
+            return New-PracticeResult -Status 'NA' -Note 'CI-03: N/A, aucun fichier de workflow a evaluer'
+        }
+
+        $without = @($workflows | Where-Object { $_.Content -notmatch '(?m)^\s*permissions:' })
+
+        if ($without.Count -eq 0) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        $names = @($without | ForEach-Object { $_.Name })
+        return New-PracticeResult -Status 'KO' `
+            -Note "CI-03: sans bloc permissions -- $($names -join ', ')"
+    }
+
+    # CI-04 -- Actions tierces epinglees a un SHA.
+    # Ne vise que les actions hors org actions/ : voir le commentaire de la
+    # pratique au catalogue pour le raisonnement.
+    'CI-04' = {
+        param($Snapshot)
+
+        $workflows = @($Snapshot.Workflows | Where-Object { $_ })
+        if ($workflows.Count -eq 0) {
+            return New-PracticeResult -Status 'NA' -Note 'CI-04: N/A, aucun fichier de workflow a evaluer'
+        }
+
+        $thirdParty = [System.Collections.Generic.List[pscustomobject]]::new()
+        foreach ($workflow in $workflows) {
+            foreach ($reference in (Get-WorkflowActionReference -Content $workflow.Content)) {
+                if ($reference.Owner -ne 'actions') { $thirdParty.Add($reference) }
+            }
+        }
+
+        if ($thirdParty.Count -eq 0) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        $loose = @($thirdParty | Where-Object { -not $_.IsPinned } | ForEach-Object { $_.Reference } | Select-Object -Unique)
+        if ($loose.Count -eq 0) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note "CI-04: action(s) tierce(s) non epinglee(s) a un SHA -- $($loose -join ', ')"
     }
 }
