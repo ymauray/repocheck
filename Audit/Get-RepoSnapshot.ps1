@@ -23,6 +23,46 @@ function Invoke-GhJson {
     return ($raw | ConvertFrom-Json)
 }
 
+function Invoke-GhApiResponse {
+    <#
+        Comme Invoke-GhJson, mais conserve le code de statut HTTP.
+
+        Indispensable pour la protection de branche : un dépôt public non
+        protégé répond 404, un dépôt privé en plan gratuit répond 403 parce que
+        la fonctionnalité y est indisponible. Les deux valent KO, mais la note
+        doit distinguer la négligence de l'impossibilité.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Endpoint
+    )
+
+    $lines = @(& gh api -i $Endpoint 2>$null)
+
+    $status = 0
+    if ($lines.Count -gt 0 -and $lines[0] -match '^HTTP/[\d.]+\s+(?<code>\d{3})') {
+        $status = [int]$Matches.code
+    }
+
+    $separator = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ([string]::IsNullOrWhiteSpace($lines[$i])) { $separator = $i; break }
+    }
+
+    $body = $null
+    if ($separator -ge 0 -and $separator -lt ($lines.Count - 1)) {
+        $payload = ($lines[($separator + 1)..($lines.Count - 1)] -join "`n")
+        if (-not [string]::IsNullOrWhiteSpace($payload)) {
+            try { $body = $payload | ConvertFrom-Json } catch { $body = $null }
+        }
+    }
+
+    return [pscustomobject]@{
+        Status = $status
+        Body   = $body
+    }
+}
+
 function Get-RepoDirectoryEntries {
     <#
         Liste le contenu d'un répertoire du dépôt. Un répertoire absent renvoie
@@ -39,14 +79,21 @@ function Get-RepoDirectoryEntries {
     if ($Path) { $endpoint = "$endpoint/$Path" }
 
     $result = Invoke-GhJson -Arguments @('api', $endpoint)
-    if ($null -eq $result) { return @() }
 
-    return @($result | ForEach-Object {
-        [pscustomobject]@{
-            Name = $_.name
-            Type = $_.type
-        }
-    })
+    $entries = @()
+    if ($null -ne $result) {
+        $entries = @($result | ForEach-Object {
+            [pscustomobject]@{
+                Name = $_.name
+                Type = $_.type
+            }
+        })
+    }
+
+    # La virgule de tete empeche PowerShell de derouler un tableau vide en $null
+    # au retour de la fonction. Sans elle, un repertoire absent se serialise en
+    # null dans le cache, et @($null) vaut un tableau d'UN element au rechargement.
+    return , $entries
 }
 
 function Get-RepoSnapshot {
@@ -62,7 +109,7 @@ function Get-RepoSnapshot {
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 2
+    $schemaVersion = 3
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -101,12 +148,40 @@ function Get-RepoSnapshot {
         Docs          = Get-RepoDirectoryEntries -Repo $Repo -Path 'docs'
     }
 
+    $defaultBranch = 'main'
+    if ($view.defaultBranchRef -and $view.defaultBranchRef.name) {
+        $defaultBranch = $view.defaultBranchRef.name
+    }
+
+    $protectionResponse = Invoke-GhApiResponse -Endpoint "repos/$Repo/branches/$defaultBranch/protection"
+    $protection = [pscustomobject]@{
+        Branch = $defaultBranch
+        Status = $protectionResponse.Status
+        Data   = $protectionResponse.Body
+    }
+
+    # Les bots (dependabot, github-actions, Copilot) ne comptent pas comme
+    # co-relecteurs humains : ils sont écartés ici plutôt que dans chaque
+    # évaluateur.
+    $collaborators = @()
+    $collaboratorsRaw = Invoke-GhJson -Arguments @('api', "repos/$Repo/collaborators")
+    if ($collaboratorsRaw) {
+        $collaborators = @($collaboratorsRaw | ForEach-Object {
+            [pscustomobject]@{
+                Login = $_.login
+                IsBot = ($_.type -eq 'Bot') -or ($_.login -match '\[bot\]$')
+            }
+        })
+    }
+
     $snapshot = [pscustomobject]@{
         Repo          = $Repo
         SchemaVersion = $schemaVersion
         CollectedAt   = (Get-Date).ToString('s')
         View          = $view
         Contents      = $contents
+        Protection    = $protection
+        Collaborators = $collaborators
     }
 
     if ($cacheFile) {
