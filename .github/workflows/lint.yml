@@ -1,0 +1,40 @@
+name: Lint
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -Repository PSGallery
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Warning,Error
+          $results | Format-Table -AutoSize
+          if ($results | Where-Object { $_.Severity -eq 'Error' }) {
+            throw "PSScriptAnalyzer a trouve des erreurs."
+          }
+
+      - name: Smoke test (catalogue + fixture)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./Invoke-RepoCheck.ps1 -Reports -Summary `
+            -CsvPath tests/fixtures/sample-audits.csv `
+            -OutputDir "$env:RUNNER_TEMP/reports" `
+            -SummaryPath "$env:RUNNER_TEMP/summary.md"
