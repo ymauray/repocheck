@@ -1,5 +1,8 @@
 # RepoCheck
 
+[![Lint](https://github.com/ymauray/repocheck/actions/workflows/lint.yml/badge.svg)](https://github.com/ymauray/repocheck/actions/workflows/lint.yml)
+[![Licence : MIT](https://img.shields.io/badge/Licence-MIT-blue.svg)](LICENSE)
+
 RepoCheck audite des dépôts GitHub par rapport à un référentiel de bonnes pratiques, et produit des rapports de conformité en Markdown.
 
 ## Principe
@@ -51,6 +54,19 @@ Chaque pratique a un poids selon sa criticité (🔴 Haute = 4, 🟠 Moyenne = 3
 | `-CsvPath` | Chemin de la matrice de résultats | `github-audits.csv` |
 | `-OutputDir` | Dossier des rapports par dépôt | `reports/` |
 | `-SummaryPath` | Chemin du rapport global | `github-audits-summary.md` |
+
+## Intégration continue et releases
+
+Un seul workflow GitHub Actions, [`lint.yml`](.github/workflows/lint.yml), déclenché à chaque push sur `main` et à chaque pull request vers `main`. Il enchaîne deux étapes :
+
+- **PSScriptAnalyzer** sur tout le dépôt (`-Severity Warning,Error`) : le job échoue sur une erreur, les avertissements sont seulement affichés.
+- **Smoke test** : `./Invoke-RepoCheck.ps1 -Reports -Summary` est lancé sur la fixture [`tests/fixtures/sample-audits.csv`](tests/fixtures/sample-audits.csv), avec des sorties écrites hors du dépôt. Le catalogue réel est parsé à chaque exécution — une ligne de tableau mal formée dans `github-bonnes-pratiques.md` fait donc échouer la CI.
+
+La branche `main` est protégée : force-push et suppression interdits, check `Lint` obligatoire et branche à jour avant merge, protection appliquée **aussi aux administrateurs**. Toute modification passe par une pull request, y compris celles du mainteneur.
+
+Dependabot surveille les versions des actions GitHub ([`dependabot.yml`](.github/dependabot.yml), hebdomadaire). C'est le seul écosystème déclaré : RepoCheck n'a aucune dépendance applicative en dehors de PowerShell et `gh`.
+
+**Il n'y a ni release, ni package, ni artefact publié**, et aucun outil de CI/CD externe au dépôt n'intervient : RepoCheck se livre en clonant le dépôt et en lançant le script. Aucun tag versionné n'est donc maintenu — c'est un choix, pas un oubli.
 
 ## Statut
 
