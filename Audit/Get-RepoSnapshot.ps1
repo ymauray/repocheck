@@ -23,6 +23,32 @@ function Invoke-GhJson {
     return ($raw | ConvertFrom-Json)
 }
 
+function Get-RepoDirectoryEntries {
+    <#
+        Liste le contenu d'un répertoire du dépôt. Un répertoire absent renvoie
+        une liste vide plutôt qu'une erreur : c'est le cas courant (beaucoup de
+        dépôts n'ont ni .github/ ni docs/).
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Repo,
+        [string]$Path
+    )
+
+    $endpoint = "repos/$Repo/contents"
+    if ($Path) { $endpoint = "$endpoint/$Path" }
+
+    $result = Invoke-GhJson -Arguments @('api', $endpoint)
+    if ($null -eq $result) { return @() }
+
+    return @($result | ForEach-Object {
+        [pscustomobject]@{
+            Name = $_.name
+            Type = $_.type
+        }
+    })
+}
+
 function Get-RepoSnapshot {
     [CmdletBinding()]
     param(
@@ -34,12 +60,20 @@ function Get-RepoSnapshot {
         [string]$CacheDir
     )
 
+    # Incrémenter à chaque ajout de données collectées : un instantané mis en
+    # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
+    $schemaVersion = 2
+
     $cacheFile = $null
     if ($CacheDir) {
         $cacheFile = Join-Path $CacheDir (($Repo -replace '/', '-') + '.json')
         if (Test-Path -LiteralPath $cacheFile) {
-            Write-Verbose "Instantané lu depuis le cache : $cacheFile"
-            return (Get-Content -LiteralPath $cacheFile -Raw -Encoding UTF8 | ConvertFrom-Json)
+            $cached = Get-Content -LiteralPath $cacheFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($cached.SchemaVersion -eq $schemaVersion) {
+                Write-Verbose "Instantané lu depuis le cache : $cacheFile"
+                return $cached
+            }
+            Write-Verbose "Cache obsolète (schéma $($cached.SchemaVersion)), recollecte : $Repo"
         }
     }
 
@@ -57,10 +91,22 @@ function Get-RepoSnapshot {
         throw "Impossible de lire le dépôt via gh : $Repo"
     }
 
+    # Les emplacements canoniques des fichiers communautaires et d'instructions :
+    # GitHub reconnaît la racine, .github/ et docs/. Quatre listings bornés
+    # plutôt qu'un arbre récursif, qui serait tronqué sur un gros dépôt.
+    $contents = [pscustomobject]@{
+        Root          = Get-RepoDirectoryEntries -Repo $Repo
+        Github        = Get-RepoDirectoryEntries -Repo $Repo -Path '.github'
+        IssueTemplate = Get-RepoDirectoryEntries -Repo $Repo -Path '.github/ISSUE_TEMPLATE'
+        Docs          = Get-RepoDirectoryEntries -Repo $Repo -Path 'docs'
+    }
+
     $snapshot = [pscustomobject]@{
-        Repo        = $Repo
-        CollectedAt = (Get-Date).ToString('s')
-        View        = $view
+        Repo          = $Repo
+        SchemaVersion = $schemaVersion
+        CollectedAt   = (Get-Date).ToString('s')
+        View          = $view
+        Contents      = $contents
     }
 
     if ($cacheFile) {
