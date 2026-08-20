@@ -76,6 +76,30 @@ function New-FilePresenceResult {
     return New-PracticeResult -Status 'KO' -Note $MissingNote
 }
 
+function Get-ProtectionUnavailableNote {
+    <#
+        Retourne une note si la protection de branche est indisponible plutot que
+        simplement absente, sinon $null.
+
+        Un depot public non protege repond 404 ; un depot prive en plan gratuit
+        repond 403, parce que la fonctionnalite lui est fermee. La convention du
+        catalogue est KO dans les deux cas -- publier le depot suffit a rendre la
+        fonctionnalite disponible, l'ecart reste donc reel -- mais la note doit
+        dire laquelle des deux situations on constate.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]$Snapshot,
+        [Parameter(Mandatory)][string]$Id
+    )
+
+    if ($Snapshot.Protection.Status -eq 403) {
+        return "${Id}: indisponible, protection de branche payante sur depot prive en plan gratuit (HTTP 403)"
+    }
+
+    return $null
+}
+
 $PracticeEvaluators = @{
 
     # META-01 -- Description du dépôt renseignée.
@@ -224,7 +248,8 @@ $PracticeEvaluators = @{
     'GOV-04' = {
         param($Snapshot)
 
-        $templates = @($Snapshot.Contents.IssueTemplate)
+        # Le filtre n'est pas cosmetique : @($null) vaut un tableau d'un element.
+        $templates = @($Snapshot.Contents.IssueTemplate | Where-Object { $_ })
         if ($templates.Count -gt 0) {
             return New-PracticeResult -Status 'OK'
         }
@@ -283,5 +308,108 @@ $PracticeEvaluators = @{
         }
 
         return New-PracticeResult -Status 'KO' -Note 'TOOL-01: aucun fichier d''instructions IA'
+    }
+
+    # CI-02 -- Required status checks sur la branche protegee.
+    'CI-02' = {
+        param($Snapshot)
+
+        $unavailable = Get-ProtectionUnavailableNote -Snapshot $Snapshot -Id 'CI-02'
+        if ($unavailable) { return New-PracticeResult -Status 'KO' -Note $unavailable }
+
+        if ($Snapshot.Protection.Status -ne 200) {
+            return New-PracticeResult -Status 'KO' `
+                -Note "CI-02: branche $($Snapshot.Protection.Branch) non protegee, donc aucun check requis"
+        }
+
+        $contexts = @()
+        if ($Snapshot.Protection.Data.required_status_checks) {
+            $contexts = @($Snapshot.Protection.Data.required_status_checks.contexts)
+        }
+
+        if ($contexts.Count -gt 0) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note 'CI-02: branche protegee mais aucun status check requis avant merge'
+    }
+
+    # BR-01 -- Branche par defaut protegee : force-push et suppression interdits.
+    'BR-01' = {
+        param($Snapshot)
+
+        $unavailable = Get-ProtectionUnavailableNote -Snapshot $Snapshot -Id 'BR-01'
+        if ($unavailable) { return New-PracticeResult -Status 'KO' -Note $unavailable }
+
+        if ($Snapshot.Protection.Status -ne 200) {
+            return New-PracticeResult -Status 'KO' `
+                -Note "BR-01: aucune protection sur $($Snapshot.Protection.Branch)"
+        }
+
+        $forcePush = [bool]$Snapshot.Protection.Data.allow_force_pushes.enabled
+        $deletions = [bool]$Snapshot.Protection.Data.allow_deletions.enabled
+
+        if (-not $forcePush -and -not $deletions) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        $permitted = [System.Collections.Generic.List[string]]::new()
+        if ($forcePush) { $permitted.Add('force-push') }
+        if ($deletions) { $permitted.Add('suppression') }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note "BR-01: branche protegee mais $($permitted -join ' et ') encore autorise(s)"
+    }
+
+    # BR-04 -- Revues obligatoires avant merge.
+    # Sans co-relecteur humain, la pratique est sans objet : c'est le seul
+    # evaluateur qui produit un NA de lui-meme, et il le fait sur un critere
+    # verifiable -- le nombre de collaborateurs humains du depot.
+    'BR-04' = {
+        param($Snapshot)
+
+        $humans = @($Snapshot.Collaborators | Where-Object { $_ -and -not $_.IsBot })
+
+        if ($humans.Count -le 1) {
+            return New-PracticeResult -Status 'NA' `
+                -Note 'BR-04: N/A, aucun co-relecteur humain (un seul collaborateur)'
+        }
+
+        $unavailable = Get-ProtectionUnavailableNote -Snapshot $Snapshot -Id 'BR-04'
+        if ($unavailable) { return New-PracticeResult -Status 'KO' -Note $unavailable }
+
+        if ($Snapshot.Protection.Status -ne 200) {
+            return New-PracticeResult -Status 'KO' `
+                -Note "BR-04: aucune protection sur $($Snapshot.Protection.Branch), donc aucune revue exigee"
+        }
+
+        $reviews = $Snapshot.Protection.Data.required_pull_request_reviews
+        if ($reviews -and [int]$reviews.required_approving_review_count -ge 1) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note "BR-04: $($humans.Count) collaborateurs humains mais aucune revue exigee avant merge"
+    }
+
+    # BR-05 -- Protection appliquee aussi aux administrateurs.
+    'BR-05' = {
+        param($Snapshot)
+
+        $unavailable = Get-ProtectionUnavailableNote -Snapshot $Snapshot -Id 'BR-05'
+        if ($unavailable) { return New-PracticeResult -Status 'KO' -Note $unavailable }
+
+        if ($Snapshot.Protection.Status -ne 200) {
+            return New-PracticeResult -Status 'KO' `
+                -Note "BR-05: aucune protection sur $($Snapshot.Protection.Branch)"
+        }
+
+        if ($Snapshot.Protection.Data.enforce_admins.enabled) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note 'BR-05: protection contournable par un administrateur (enforce_admins desactive)'
     }
 }
