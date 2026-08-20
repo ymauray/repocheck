@@ -100,6 +100,31 @@ function Get-ProtectionUnavailableNote {
     return $null
 }
 
+function Get-SecurityFeatureState {
+    <#
+        Lit l'etat d'une fonctionnalite de security_and_analysis.
+
+        Retourne 'enabled', 'disabled', ou 'unavailable' quand l'objet entier est
+        absent -- ce qui est le cas sur un depot prive en plan gratuit, ou le
+        secret scanning n'est pas offert. C'est le pendant du 403 de la
+        protection de branche : la fonctionnalite n'est pas negligee, elle est
+        fermee.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]$Snapshot,
+        [Parameter(Mandatory)][string]$Feature
+    )
+
+    $analysis = $Snapshot.Security.Analysis
+    if (-not $analysis) { return 'unavailable' }
+
+    $entry = $analysis.$Feature
+    if (-not $entry -or -not $entry.status) { return 'unavailable' }
+
+    return $entry.status
+}
+
 $PracticeEvaluators = @{
 
     # META-01 -- Description du dépôt renseignée.
@@ -411,5 +436,65 @@ $PracticeEvaluators = @{
 
         return New-PracticeResult -Status 'KO' `
             -Note 'BR-05: protection contournable par un administrateur (enforce_admins desactive)'
+    }
+
+    # SEC-01 -- Dependabot alerts. L'endpoint repond 204 si actives, 404 sinon.
+    'SEC-01' = {
+        param($Snapshot)
+
+        if ($Snapshot.Security.VulnerabilityAlertStatus -eq 204) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note 'SEC-01: Dependabot alerts desactivees, aucune notification en cas de CVE sur une dependance'
+    }
+
+    # SEC-02 -- Dependabot security updates.
+    'SEC-02' = {
+        param($Snapshot)
+
+        if ($Snapshot.Security.AutomatedFixesEnabled) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note 'SEC-02: Dependabot security updates desactivees'
+    }
+
+    # SEC-04 -- Secret scanning.
+    'SEC-04' = {
+        param($Snapshot)
+
+        $state = Get-SecurityFeatureState -Snapshot $Snapshot -Feature 'secret_scanning'
+
+        if ($state -eq 'enabled') {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        if ($state -eq 'unavailable') {
+            return New-PracticeResult -Status 'KO' `
+                -Note 'SEC-04: indisponible, secret scanning non offert sur depot prive en plan gratuit (security_and_analysis absent)'
+        }
+
+        return New-PracticeResult -Status 'KO' -Note 'SEC-04: secret scanning desactive'
+    }
+
+    # SEC-05 -- Push protection du secret scanning.
+    'SEC-05' = {
+        param($Snapshot)
+
+        $state = Get-SecurityFeatureState -Snapshot $Snapshot -Feature 'secret_scanning_push_protection'
+
+        if ($state -eq 'enabled') {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        if ($state -eq 'unavailable') {
+            return New-PracticeResult -Status 'KO' `
+                -Note 'SEC-05: indisponible, meme cause que SEC-04'
+        }
+
+        return New-PracticeResult -Status 'KO' -Note 'SEC-05: push protection desactivee'
     }
 }
