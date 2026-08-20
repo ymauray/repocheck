@@ -163,6 +163,8 @@ function New-RepoReport {
     }
 
     $applicable = $rows | Where-Object { $_.Status -ne 'NA' }
+    $applicableCount = @($applicable).Count
+    $totalCount = @($rows).Count
     $earnedWeight = ($applicable | Where-Object { $_.Status -eq 'OK' } | Measure-Object -Property Weight -Sum).Sum
     $totalWeight = ($applicable | Measure-Object -Property Weight -Sum).Sum
     $score = 0
@@ -191,6 +193,8 @@ function New-RepoReport {
     $lines.Add("Généré le $(Get-Date -Format 'yyyy-MM-dd') à partir de ``$csvLeaf`` et ``$catalogLeaf``.")
     $lines.Add('')
     $lines.Add("## Score global : $score % (pondéré par criticité)")
+    $lines.Add('')
+    $lines.Add("Calculé sur $applicableCount pratiques applicables du catalogue, qui en compte $totalCount : les pratiques marquées NA sont exclues du numérateur comme du dénominateur. Un score ne se compare donc qu'à assiette comparable.")
     $lines.Add('')
     $lines.Add('| Criticité | Poids | Respectées | Applicables |')
     $lines.Add('|---|---|---|---|')
@@ -236,10 +240,12 @@ function New-RepoReport {
     }
 
     return [pscustomobject]@{
-        Repo      = $repo
-        Score     = $score
-        Breakdown = $breakdown
-        Content   = ($lines -join [Environment]::NewLine)
+        Repo       = $repo
+        Score      = $score
+        Applicable = $applicableCount
+        Total      = $totalCount
+        Breakdown  = $breakdown
+        Content    = ($lines -join [Environment]::NewLine)
     }
 }
 
@@ -264,8 +270,8 @@ function New-SummaryReport {
     $lines.Add("Score moyen : $avg %")
     $lines.Add('')
 
-    $lines.Add('| Dépôt | Score | 🔴 Haute | 🟠 Moyenne | 🟡 Faible | ⚪ Optionnel | Rapport |')
-    $lines.Add('|---|---|---|---|---|---|---|')
+    $lines.Add('| Dépôt | Score | Applicables | 🔴 Haute | 🟠 Moyenne | 🟡 Faible | ⚪ Optionnel | Rapport |')
+    $lines.Add('|---|---|---|---|---|---|---|---|')
     foreach ($r in $sorted) {
         $cells = foreach ($emoji in @('🔴', '🟠', '🟡', '⚪')) {
             $b = $r.Breakdown | Where-Object { $_.Criticality -eq $emoji }
@@ -273,7 +279,7 @@ function New-SummaryReport {
         }
         $fileName = ($r.Repo -replace '/', '-') + '.md'
         $link = "[Détail]($([System.IO.Path]::GetFileName($OutputDir))/$fileName)"
-        $lines.Add("| $($r.Repo) | $($r.Score) % | $($cells[0]) | $($cells[1]) | $($cells[2]) | $($cells[3]) | $link |")
+        $lines.Add("| $($r.Repo) | $($r.Score) % | $($r.Applicable)/$($r.Total) | $($cells[0]) | $($cells[1]) | $($cells[2]) | $($cells[3]) | $link |")
     }
     $lines.Add('')
 
