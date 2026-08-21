@@ -11,7 +11,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | META-01 | Description du dépôt renseignée | 🟡 | Premier élément lu par un visiteur, doit résumer le projet en une ligne. |
 | META-02 | Topics renseignés | 🟡 | Améliore la découvrabilité via la recherche GitHub. |
 | META-03 | LICENSE présente | 🔴 | Sans licence explicite, le code est "tous droits réservés" par défaut, personne ne peut légalement le réutiliser. |
-| META-04 | README complet (install, usage, contribution) | 🟠 | C'est le point d'entrée de tout nouveau lecteur ou contributeur. |
+| META-04 | README complet (install et usage) | 🟠 | C'est le point d'entrée de tout nouveau lecteur. S'évalue sur ce qu'il faut pour installer et utiliser le projet : l'absence d'indications de **contribution** relève de GOV-01 et ne doit pas être comptée deux fois, au même titre que META-08 ne recompte pas l'absence de README. |
 | META-05 | Homepage URL renseignée | ⚪ | Ne s'évalue que si un site ou une documentation dédiés existent. Sans cible à pointer, la pratique est **sans objet** : `NA`. Un site qui existe — GitHub Pages actif, déploiement documenté — mais dont l'URL n'est pas renseignée vaut `KO`, de même qu'une homepage pointant sur le dépôt lui-même, qui n'oriente vers rien. |
 | META-06 | `.gitignore` adapté au langage | 🟡 | Évite de committer des artefacts de build ou fichiers locaux. `NA` sur un dépôt purement déclaratif, qui ne produit aucun artefact et n'a pas d'outillage local laissant des traces — il n'y a alors rien à ignorer. |
 | META-07 | `.editorconfig` présent | 🟡 | Garantit un style de code cohérent entre éditeurs/contributeurs. |
