@@ -22,14 +22,14 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 
 | ID | Pratique | Criticité | Commentaire |
 |---|---|---|---|
-| GOV-01 | `CONTRIBUTING.md` | 🟡 | Explique comment proposer une contribution, utile même en solo pour des contributeurs externes ponctuels. |
+| GOV-01 | `CONTRIBUTING.md` | 🟡 | Explique comment proposer une contribution, utile même en solo pour des contributeurs externes ponctuels. **Voie contribution de code** : `NA` sur un dépôt qui n'héberge aucun code, où proposer une contribution n'a pas d'objet. |
 | GOV-02 | `CODE_OF_CONDUCT.md` | ⚪ | Pose les attentes envers quiconque ouvre une issue ou une PR. Comme GOV-07, s'évalue **sur le fait et non sur l'intention** : sur un dépôt public, l'ajouter produit un effet, donc son absence vaut `KO`. Le `NA` de GOV-06 et BR-04 tient à l'absence de *reviewer* ; il ne se transpose pas ici, où le public visé est celui des contributeurs potentiels, pas des relecteurs désignés. |
-| GOV-03 | `SECURITY.md` (politique de sécurité) | 🟠 | Indique comment signaler une vulnérabilité de façon responsable plutôt que par une issue publique. |
-| GOV-04 | Template(s) d'issue | 🟡 | Standardise les rapports de bug/demandes de fonctionnalité reçus. |
-| GOV-05 | Template de pull request | 🟡 | Rappelle une checklist (tests, changelog...) à chaque PR. |
+| GOV-03 | `SECURITY.md` (politique de sécurité) | 🟠 | Indique comment signaler une vulnérabilité de façon responsable plutôt que par une issue publique. **Voie logiciel** : `NA` sur un dépôt qui n'héberge aucun logiciel, où aucune vulnérabilité ne peut être signalée. |
+| GOV-04 | Template(s) d'issue | 🟡 | Standardise les rapports de bug/demandes de fonctionnalité reçus. **Voie interaction** : reste applicable tant que le dépôt est public et les issues ouvertes, même sans code — quelqu'un peut toujours écrire. |
+| GOV-05 | Template de pull request | 🟡 | Rappelle une checklist (tests, changelog...) à chaque PR. **Voie contribution de code**, comme GOV-01 : `NA` sur un dépôt sans code. |
 | GOV-06 | `CODEOWNERS` | ⚪ | Sans reviewer dédié, un `CODEOWNERS` ne déclenche aucune demande de revue : marquer `NA` en mainteneur unique, **comme BR-04**, dont la condition est identique. Pertinent dès que des reviewers apparaissent. |
 | GOV-07 | Discussions activées | ⚪ | Canal Q&A distinct des issues. Le souhait du mainteneur n'étant pas observable, la pratique s'évalue sur le fait et non sur l'intention : Discussions désactivées vaut `KO`. |
-| GOV-08 | `SUPPORT.md` (où obtenir de l'aide) | 🟡 | Fichier communautaire reconnu par GitHub (Insights → Community Standards), distinct de `CONTRIBUTING`/`SECURITY` — indique où poser des questions plutôt que d'ouvrir une issue. |
+| GOV-08 | `SUPPORT.md` (où obtenir de l'aide) | 🟡 | Fichier communautaire reconnu par GitHub (Insights → Community Standards), distinct de `CONTRIBUTING`/`SECURITY` — indique où poser des questions plutôt que d'ouvrir une issue. **Voie interaction**, comme GOV-04 : reste applicable sur un dépôt public sans code. |
 
 ## CI/CD et releases
 

@@ -56,22 +56,34 @@ d'objet dans ce dépôt**.
 
 ### 4.2 Le test décisif du `NA`
 
-Deux questions, **dans cet ordre**. Les intervertir fait basculer en `NA` des
-pratiques qui sont en réalité respectées.
+Trois questions, **dans cet ordre**. L'ordre est tout : la même pratique change
+de statut selon la question qu'on pose en premier.
 
-**1. La pratique est-elle respectée ?** Si oui → `OK`, et on s'arrête là.
+**1. La pratique porte-t-elle sur quelque chose qui existe dans ce dépôt ?**
+Si non → `NA`, et on s'arrête là.
 
-Un dépôt qui n'utilise aucune action tierce **respecte** CI-04 : il n'a aucune
-action non épinglée. Il n'en est pas dispensé. Appliquer une pratique déjà
-satisfaite ne produit évidemment aucun effet — ce n'est pas pour autant un `NA`.
+C'est la question de l'**objet**. Un dépôt sans aucun workflow ne peut pas y
+déclarer de bloc `permissions:` : CI-03 n'a pas d'objet. Un dépôt sans aucun tag
+n'a aucune cohérence de tags à évaluer : CI-06 n'a pas d'objet.
 
-**2. Seulement si elle ne l'est pas :** si le mainteneur appliquait cette
-pratique, est-ce que ça produirait un effet ?
+Attention au piège de la vacuité : « tous les workflows déclarent leurs
+permissions » est *techniquement vrai* quand il n'y a aucun workflow. Ce n'est
+pas pour autant une conformité — c'est une absence d'objet.
 
-- Non → `NA`. Activer Dependabot alerts sur `homebrew-tap` : aucun manifest
-  reconnu par Dependabot n'y existe, l'activation ne produirait rien.
-- Oui → `KO`. Activer le secret scanning sur un dépôt de profil : ça marche et
-  ça sert, l'absence est donc un manquement réel.
+**2. Est-elle respectée ?** Si oui → `OK`.
+
+C'est la question de la **conformité**, et elle ne se pose que si l'objet existe.
+Un dépôt qui a des workflows et n'y utilise aucune action tierce **respecte**
+CI-04 : l'objet existe — des actions —, et aucune n'est laissée sur un tag
+mouvant. Il n'en est pas dispensé.
+
+**3. Sinon → `KO`,** sauf si l'appliquer ne produirait aucun effet, auquel cas
+`NA`.
+
+Activer Dependabot alerts sur `homebrew-tap` : le réglage existe bien, mais
+aucun manifest reconnu par Dependabot n'est présent, l'activation ne produirait
+rien → `NA`. Activer le secret scanning sur un dépôt de profil : ça marche et ça
+sert → `KO`.
 
 ### 4.3 Trois `NA` interdits
 
