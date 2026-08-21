@@ -44,7 +44,7 @@ Conséquence directe : ces fichiers n'existent que dans le dossier de travail o�
 
 ## Prochaines étapes
 
-1. **`-Audit` (en cours)** — interroger `gh api` pour remplir et mettre à jour `github-audits.csv` automatiquement. La conception reste à faire : périmètre des pratiques réellement automatisables, forme des notes générées, comportement quand une valeur existante du CSV contredit ce que voit l'API.
+1. **`-Audit` — 30 pratiques sur 35 implémentées.** Les 5 restantes (META-04, META-06, META-09, CI-05, SEC-03) relèvent du jugement et sont saisies à la main ; elles apparaissent en `❔` dans les rapports et sont exclues du score. Reste ouvert : les `NA` de contexte, qu'`-Audit` ne peut pas poser.
 2. **`.repocheckignore`** — un fichier dans chaque dépôt audité, listant les IDs de pratiques à ignorer pour ce dépôt (ex : `CI-01` sur un dépôt qui utilise Codemagic plutôt que GitHub Actions, invisible via `gh api`). Il joue le rôle des `NA` posés à la main aujourd'hui, mais de façon lisible par `-Audit`. À construire avec `-Audit`, dont il est le complément indispensable — sans lui, l'automatisation dégradera les résultats par rapport aux audits manuels.
 3. **`-Fix`** — appliquer les corrections sûres (réglages GitHub, pas de réécriture de code). Bons candidats déjà identifiés : `default_workflow_permissions` (CI-07), protection de branche, activation des fonctionnalités de sécurité.
 

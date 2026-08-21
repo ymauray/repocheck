@@ -18,6 +18,28 @@ Trois éléments distincts :
 - PowerShell 5.1+ ou [PowerShell 7+](https://github.com/PowerShell/PowerShell)
 - [GitHub CLI](https://cli.github.com/) (`gh`), authentifié, pour l'audit d'un dépôt via l'API GitHub
 
+## Auditer un dépôt
+
+```powershell
+./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo
+./Invoke-RepoCheck.ps1 -Reports -Summary
+```
+
+Le premier appel interroge GitHub via `gh` et remplit la matrice ; le second produit les rapports. Le dépôt n'a pas besoin d'y figurer au préalable : une ligne est créée.
+
+**`-Audit` évalue 30 des 35 pratiques du catalogue.** Les cinq autres demandent un jugement qu'une lecture d'API ne rend pas — la complétude d'un README, la pertinence d'un `.gitignore`, l'existence d'une chaîne de release externe. Elles restent vides dans la matrice, apparaissent en `❔` dans le rapport, sont **exclues du score**, et sont listées sous « Restent à évaluer à la main ». Les renseigner consiste à éditer la colonne correspondante du CSV.
+
+Deux points de vigilance, hérités de l'expérience :
+
+- **`-Audit` ne pose jamais de `NA` de contexte.** Il ne peut pas savoir qu'un dépôt est une page de profil ou un tap Homebrew, et marquera donc `KO` des pratiques qui n'ont aucun objet. Relire les `KO` d'un dépôt atypique avant de les prendre pour argent comptant.
+- **La colonne `Notes` n'est jamais réécrite.** Les notes produites par `-Audit` vont à la console ; celles de la matrice sont à vous.
+
+Pour rejouer une évaluation sans réinterroger GitHub — utile pour itérer :
+
+```powershell
+./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo -SnapshotCacheDir .cache
+```
+
 ## Utilisation
 
 Générer un rapport Markdown par dépôt (dans `reports/`) :
@@ -47,6 +69,8 @@ Chaque pratique a un poids selon sa criticité (🔴 Haute = 4, 🟠 Moyenne = 3
 
 | Paramètre | Description | Défaut |
 |---|---|---|
+| `-Audit` | Interroge GitHub et met à jour la matrice pour les dépôts de `-Repo` | — |
+| `-SnapshotCacheDir` | Dossier de cache des instantanés collectés par `-Audit` | — |
 | `-Reports` | Génère un rapport Markdown par dépôt | — |
 | `-Summary` | Génère le rapport global | — |
 | `-Repo` | Limite le traitement à un ou plusieurs dépôts | tous les dépôts du CSV |
@@ -70,7 +94,7 @@ Dependabot surveille les versions des actions GitHub ([`dependabot.yml`](.github
 
 ## Statut
 
-Le catalogue de pratiques est stabilisé à 35 entrées, après l'audit manuel de 14 dépôts. `github-audits.csv` est encore rempli à la main : le mode `-Audit`, qui automatisera cette collecte via `gh api`, est en cours d'implémentation. Un mode `-Fix`, appliquant les corrections sûres (réglages GitHub, pas de réécriture de code), suivra.
+Le catalogue est stabilisé à 35 entrées, après l'audit manuel de 14 dépôts. Le mode `-Audit` en couvre 30 ; les 5 restantes relèvent du jugement et sont saisies à la main. Un mode `-Fix`, appliquant les corrections sûres (réglages GitHub, pas de réécriture de code), reste à écrire.
 
 ## Licence
 
