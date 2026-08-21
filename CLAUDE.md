@@ -14,13 +14,18 @@ La liste des dépôts déjà audités, leurs scores et les notes détaillées vi
 
 ## Méthodologie pour auditer un nouveau dépôt
 
-1. Collecter les données via `gh repo view`, `gh api repos/{owner}/{repo}/...` (contents, branches/{branch}/protection, security_and_analysis, vulnerability-alerts, contents/.github/workflows/*, contributors...).
-2. Comparer chaque pratique du catalogue au dépôt réel : `OK`, `KO`, ou `NA` si la pratique ne s'applique pas dans ce contexte (ex: revues obligatoires pour un mainteneur solo).
-3. Si un écart intéressant ou une pratique manquante dans le catalogue apparaît (ex: `enforce_admins`, généralisation du fichier d'instructions IA...), en discuter avec l'utilisateur avant de modifier `github-bonnes-pratiques.md` — ne pas modifier le catalogue unilatéralement.
-4. Ajouter/mettre à jour la ligne du dépôt dans `github-audits.csv`, avec des notes (`ID: explication`, séparées par ` | `) pour les cas particuliers.
-5. Régénérer les rapports : `./Invoke-RepoCheck.ps1 -Reports -Summary`.
+La procédure courante est en trois temps, décrite pour l'utilisateur dans le `README` :
 
-Cette méthodologie reste la référence de ce que `-Audit` doit reproduire, et la marche à suivre si un dépôt doit être audité à la main entre-temps.
+1. `./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo` — remplit les 30 pratiques déterministes.
+2. **Passe de jugement** : compléter les `❔` (META-04, META-06, META-09, CI-05, SEC-03) et vérifier les `NA` de contexte, en suivant `docs/cahier-des-charges-agent.md`. C'est le rôle d'un agent, et c'est la moitié de l'outil qui ne tient pas dans une commande. Nécessaire sur un dépôt atypique — profil, tap, cible de distribution —, optionnelle sur un dépôt applicatif ordinaire.
+3. `./Invoke-RepoCheck.ps1 -Reports -Summary`.
+
+Deux règles qui n'ont pas changé :
+
+- **Ne jamais modifier `github-bonnes-pratiques.md` unilatéralement.** Si un écart intéressant ou une pratique manquante apparaît, en discuter avec l'utilisateur d'abord.
+- Les notes de la matrice (`ID: explication`, séparées par ` | `) sont écrites à la main et ne sont jamais réécrites par `-Audit`.
+
+Un audit entièrement manuel reste possible en collectant directement via `gh repo view` et `gh api repos/{owner}/{repo}/...` — c'est ainsi qu'ont été construits les 14 dépôts de la référence.
 
 ## Ce que `-Audit` doit savoir (acquis des 14 audits manuels)
 
