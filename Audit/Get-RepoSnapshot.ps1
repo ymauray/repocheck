@@ -147,7 +147,7 @@ function Get-RepoSnapshot {
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 5
+    $schemaVersion = 6
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -231,6 +231,23 @@ function Get-RepoSnapshot {
 
     $workflows = Get-RepoWorkflow -Repo $Repo
 
+    # --paginate : nannyplus a plus de tags qu'une page n'en rend, et un tag hors
+    # semver pourrait se cacher au-dela de la premiere.
+    $tags = @()
+    $tagsRaw = & gh api --paginate -q '.[].name' "repos/$Repo/tags" 2>$null
+    if ($LASTEXITCODE -eq 0 -and $tagsRaw) {
+        $tags = @($tagsRaw | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    }
+
+    $workflowPermissions = Invoke-GhJson -Arguments @('api', "repos/$Repo/actions/permissions/workflow")
+
+    $readme = ''
+    $readmePayload = Invoke-GhJson -Arguments @('api', "repos/$Repo/readme")
+    if ($readmePayload -and $readmePayload.content) {
+        $clean = ($readmePayload.content -replace '\s', '')
+        $readme = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($clean))
+    }
+
     $snapshot = [pscustomobject]@{
         Repo          = $Repo
         SchemaVersion = $schemaVersion
@@ -241,6 +258,9 @@ function Get-RepoSnapshot {
         Collaborators = $collaborators
         Security      = $security
         Workflows     = $workflows
+        Tags          = $tags
+        Readme        = $readme
+        WorkflowPermissions = $workflowPermissions
     }
 
     if ($cacheFile) {
