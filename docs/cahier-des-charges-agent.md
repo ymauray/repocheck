@@ -139,15 +139,46 @@ Conditions pour que le résultat veuille dire quelque chose :
 3. **Trois chiffres à relever** : pratiques conformes sur 35 ; divergences
    restantes ; et surtout **`NA` posés à tort**, qui sont l'erreur coûteuse.
 
-### Ce qu'on cherche à savoir
+### Ce qui a été mesuré
 
-| Question | Ce qu'elle tranche |
-|---|---|
-| L'agent retrouve-t-il les 29 pratiques déterministes ? | s'il faut lui déléguer ce que le script fait déjà bien |
-| Retrouve-t-il les 18 `NA` que le script ne peut pas poser ? | si le jugement est réellement son avantage |
-| Traite-t-il les 6 pratiques hors périmètre du script ? | s'il complète le script ou s'il le remplace |
-| Deux exécutions donnent-elles le même résultat ? | le coût en reproductibilité |
+Six exécutions à froid, dans des worktrees git isolés — la référence et les
+rapports étant ignorés par git, ils n'existent pas dans l'environnement de
+l'agent : l'isolation ne repose sur aucune promesse.
 
-La dernière question est la plus importante et la seule qui puisse condamner
-l'approche : un score qui bouge d'une exécution à l'autre sans que le dépôt ait
-changé rend l'outil inutilisable pour suivre une progression.
+| Dépôt | Exécutions | Stabilité entre elles | Écart de score |
+|---|---|---|---|
+| `homebrew-tap` | 2 | 33/35 | 1 point (20 % / 19 %) |
+| `clepsydre`, documents imprécis | 2 | 33/35 | **8 points** (19 % / 27 %) |
+| `clepsydre`, documents corrigés | 2 | **35/35** | **0** |
+
+Réponses aux quatre questions :
+
+1. **Les 29 pratiques déterministes** — aucune divergence sur aucune d'elles, sur
+   les six exécutions. Il n'y a rien à gagner à déléguer à un agent ce que le
+   script établit déjà par lecture d'API.
+2. **Les `NA` de contexte** — retrouvés, et l'exercice a fait mieux que les
+   retrouver : il a révélé **trois `NA` fautifs de la référence**, dont deux
+   violaient la règle des `NA` interdits énoncée plus haut.
+3. **Les 6 pratiques hors périmètre du script** — toutes traitées correctement.
+   C'est là que l'agent complète réellement le script, plutôt que de le doubler.
+4. **La reproductibilité** — 33/35 avec des documents imprécis, **35/35 après
+   les avoir précisés**, sans rien changer à l'agent.
+
+### Deux enseignements
+
+**Le taux de stabilité ne veut rien dire seul.** Les deux premières expériences
+donnent le même 33/35, pour un écart de score de 1 point puis de 8. Ce qui
+compte est la **criticité** des cellules instables : une 🔴 pèse quatre fois une
+⚪. C'est cette mesure-là qu'il faut suivre.
+
+**L'instabilité n'est pas une propriété de l'agent, c'est un symptôme
+d'imprécision du référentiel.** Sur les six exécutions, aucune divergence n'a
+été une erreur de raisonnement : chacune a pointé une imprécision du catalogue,
+une contradiction entre le catalogue et ce document, ou une erreur de la
+référence. Les corriger a supprimé l'instabilité.
+
+Le corollaire est important : ce que le mode `-Audit` a apporté n'est pas
+seulement 29 règles automatisées. C'est d'avoir **forcé à expliciter des règles
+que quatorze audits manuels laissaient implicites**. Un agent lâché sur un
+référentiel flou produit un résultat plausible et instable, sans le signaler ;
+écrire le code, lui, ne pardonne rien.
