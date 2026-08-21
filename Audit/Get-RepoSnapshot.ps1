@@ -134,6 +134,11 @@ function Get-RepoWorkflow {
     return , $workflows
 }
 
+# Applications qui publient des check-runs sans etre des CI. « GitHub Actions »
+# est traite a part car CI-01 se tranche alors sur les fichiers de workflow ;
+# Dependabot publie des checks de mise a jour de dependances. Liste a etendre.
+$NonCiCheckRunApps = @('GitHub Actions', 'Dependabot')
+
 function Get-RepoSnapshot {
     [CmdletBinding()]
     param(
@@ -142,12 +147,15 @@ function Get-RepoSnapshot {
         # Si fourni, l'instantané est lu depuis ce dossier s'il s'y trouve, et y
         # est écrit sinon. Rend les itérations de développement rejouables sans
         # réinterroger GitHub.
-        [string]$CacheDir
+        [string]$CacheDir,
+
+        # Nombre de commits remontés à la recherche de check-runs.
+        [int]$CheckRunDepth = 12
     )
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 8
+    $schemaVersion = 9
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -236,16 +244,35 @@ function Get-RepoSnapshot {
     # fichier de workflow, ni entree dans actions/workflows.
     # Ne pas passer --jq a Invoke-GhJson : la sortie serait une chaine brute et
     # non du JSON. On recupere l'objet et on le traite ici.
+    #
+    # Il faut remonter l'historique, pas se contenter du HEAD : sur nannyplus, le
+    # HEAD ne porte aucun check-run alors que des runs Codemagic reussis existent
+    # trois commits plus loin. Et on ne retient que les check-RUNS ayant une
+    # conclusion, jamais les check-suites : ce meme depot a trois suites
+    # « queued » a zero run (Travis, Codemagic, Xcode Cloud), dont deux sont des
+    # installations mortes qu'un comptage naif prendrait pour des CI actives.
+    # Remonter loin ne sert que si le depot n'a aucun workflow : sinon CI-01 se
+    # tranche sur les fichiers, et l'historique ne ferait que couter des appels.
+    $depth = 2
+    if (@($workflows).Count -eq 0) { $depth = $CheckRunDepth }
+
     $checkRunApps = @()
-    $head = Invoke-GhJson -Arguments @('api', "repos/$Repo/commits?per_page=1")
-    if ($head -and @($head).Count -gt 0 -and @($head)[0].sha) {
-        $sha = @($head)[0].sha
-        $checks = Invoke-GhJson -Arguments @('api', "repos/$Repo/commits/$sha/check-runs")
-        if ($checks -and $checks.check_runs) {
-            $checkRunApps = @($checks.check_runs |
-                ForEach-Object { $_.app.name } |
-                Where-Object { $_ } |
-                Sort-Object -Unique)
+    $recent = Invoke-GhJson -Arguments @('api', "repos/$Repo/commits?per_page=$depth")
+    foreach ($commit in @($recent)) {
+        if (-not $commit -or -not $commit.sha) { continue }
+
+        $checks = Invoke-GhJson -Arguments @('api', "repos/$Repo/commits/$($commit.sha)/check-runs")
+        if (-not $checks -or -not $checks.check_runs) { continue }
+
+        $apps = @($checks.check_runs |
+            Where-Object { $_.conclusion } |
+            ForEach-Object { $_.app.name } |
+            Where-Object { $_ })
+
+        if ($apps.Count -gt 0) {
+            $checkRunApps = @($apps | Sort-Object -Unique)
+            # Un fournisseur tiers suffit a conclure : inutile de remonter plus loin.
+            if (@($checkRunApps | Where-Object { $_ -notin $NonCiCheckRunApps }).Count -gt 0) { break }
         }
     }
 

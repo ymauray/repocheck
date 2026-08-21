@@ -458,7 +458,7 @@ $PracticeEvaluators = @{
             return New-PracticeResult -Status 'OK'
         }
 
-        $external = @($Snapshot.CheckRunApps | Where-Object { $_ -and $_ -ne 'GitHub Actions' })
+        $external = @($Snapshot.CheckRunApps | Where-Object { $_ -and $_ -notin $NonCiCheckRunApps })
         if ($external.Count -gt 0) {
             return New-PracticeResult -Status 'OK' `
                 -Note "CI-01: aucun workflow declenche sur push ou PR, mais CI externe attestee par check-run -- $($external -join ', ')"
