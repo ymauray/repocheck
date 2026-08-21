@@ -106,6 +106,7 @@ $StatusSymbol = @{
     'OK' = '✅'
     'KO' = '❌'
     'NA' = '➖'
+    'ND' = '❔'
 }
 
 function Split-CommaList {
@@ -189,7 +190,9 @@ function New-RepoReport {
 
     $rows = foreach ($entry in $CatalogEntries) {
         $status = $AuditRow.PSObject.Properties[$entry.Id].Value
-        if ([string]::IsNullOrWhiteSpace($status)) { $status = 'KO' }
+        # Cellule vide = pratique non evaluee, pas pratique en echec. La compter
+        # KO reprocherait au depot un manquement que personne n'a constate.
+        if ([string]::IsNullOrWhiteSpace($status)) { $status = 'ND' }
         $status = $status.Trim().ToUpperInvariant()
 
         [pscustomobject]@{
@@ -204,7 +207,8 @@ function New-RepoReport {
         }
     }
 
-    $applicable = $rows | Where-Object { $_.Status -ne 'NA' }
+    $applicable = $rows | Where-Object { $_.Status -ne 'NA' -and $_.Status -ne 'ND' }
+    $pending = @($rows | Where-Object { $_.Status -eq 'ND' })
     $applicableCount = @($applicable).Count
     $totalCount = @($rows).Count
     $earnedWeight = ($applicable | Where-Object { $_.Status -eq 'OK' } | Measure-Object -Property Weight -Sum).Sum
@@ -236,7 +240,11 @@ function New-RepoReport {
     $lines.Add('')
     $lines.Add("## Score global : $score % (pondéré par criticité)")
     $lines.Add('')
-    $lines.Add("Calculé sur $applicableCount pratiques applicables du catalogue, qui en compte $totalCount : les pratiques marquées NA sont exclues du numérateur comme du dénominateur. Un score ne se compare donc qu'à assiette comparable.")
+    $scoreNote = "Calculé sur $applicableCount pratiques applicables du catalogue, qui en compte $totalCount : les pratiques marquées NA sont exclues du numérateur comme du dénominateur. Un score ne se compare donc qu'à assiette comparable."
+    if ($pending.Count -gt 0) {
+        $scoreNote = "$scoreNote **$($pending.Count) pratique(s) restent à évaluer à la main** et sont exclues du calcul — voir la section dédiée en fin de rapport."
+    }
+    $lines.Add($scoreNote)
     $lines.Add('')
     $lines.Add('| Criticité | Poids | Respectées | Applicables |')
     $lines.Add('|---|---|---|---|')
@@ -271,6 +279,19 @@ function New-RepoReport {
         $lines.Add('')
     }
 
+    if ($pending.Count -gt 0) {
+        $lines.Add('## Restent à évaluer à la main')
+        $lines.Add('')
+        $lines.Add("Ces pratiques demandent un jugement que `-Audit` ne rend pas : elles ne sont ni respectées ni en échec, elles n'ont pas été examinées.")
+        $lines.Add('')
+        $lines.Add('| ID | Pratique | Criticité |')
+        $lines.Add('|---|---|---|')
+        foreach ($r in $pending) {
+            $lines.Add("| $($r.Id) | $($r.Practice) | $($r.Criticality) |")
+        }
+        $lines.Add('')
+    }
+
     $notedRows = $rows | Where-Object { $_.Note }
     if ($notedRows) {
         $lines.Add('## Notes spécifiques à ce dépôt')
@@ -285,6 +306,7 @@ function New-RepoReport {
         Repo       = $repo
         Score      = $score
         Applicable = $applicableCount
+        Pending    = $pending.Count
         Total      = $totalCount
         Breakdown  = $breakdown
         Content    = ($lines -join [Environment]::NewLine)
@@ -321,7 +343,9 @@ function New-SummaryReport {
         }
         $fileName = ($r.Repo -replace '/', '-') + '.md'
         $link = "[Détail]($([System.IO.Path]::GetFileName($OutputDir))/$fileName)"
-        $lines.Add("| $($r.Repo) | $($r.Score) % | $($r.Applicable)/$($r.Total) | $($cells[0]) | $($cells[1]) | $($cells[2]) | $($cells[3]) | $link |")
+        $applicableCell = "$($r.Applicable)/$($r.Total)"
+        if ($r.Pending -gt 0) { $applicableCell = "$applicableCell (+$($r.Pending) ❔)" }
+        $lines.Add("| $($r.Repo) | $($r.Score) % | $applicableCell | $($cells[0]) | $($cells[1]) | $($cells[2]) | $($cells[3]) | $link |")
     }
     $lines.Add('')
 
