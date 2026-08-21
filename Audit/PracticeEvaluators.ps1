@@ -159,6 +159,62 @@ function Get-WorkflowActionReference {
     return , $references.ToArray()
 }
 
+function Test-WorkflowRunsOnPushOrPullRequest {
+    <#
+        Un workflow compte comme CI s'il se declenche sur une pull request, ou
+        sur un push de branche. Un push restreint aux tags ne compte pas : il
+        publie une release, il n'attrape pas une regression avant merge.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Content)
+
+    $lines = $Content -split "`r?`n"
+
+    # Forme en ligne : on: [push, pull_request]
+    foreach ($line in $lines) {
+        if ($line -match '^\s*on:\s*\[(?<list>[^\]]*)\]') {
+            if ($Matches.list -match 'push|pull_request') { return $true }
+        }
+    }
+
+    # Forme en bloc
+    $inOn = $false
+    $inPush = $false
+    $pushIndent = -1
+    $pushKeys = [System.Collections.Generic.List[string]]::new()
+
+    foreach ($line in $lines) {
+        if ($line -match '^on:\s*$') { $inOn = $true; continue }
+        if (-not $inOn) { continue }
+        if ($line -match '^\S') { break }
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+
+        $indent = ($line -replace '^(\s*).*$', '$1').Length
+
+        if ($inPush -and $indent -le $pushIndent) { $inPush = $false }
+
+        if ($line -match '^\s*pull_request:') { return $true }
+
+        if ($line -match '^\s*push:') {
+            $inPush = $true
+            $pushIndent = $indent
+            continue
+        }
+
+        if ($inPush -and $line -match '^\s*(?<key>[A-Za-z_-]+):') {
+            $pushKeys.Add($Matches.key)
+        }
+    }
+
+    if ($pushIndent -ge 0) {
+        # push: sans sous-cle vise toutes les branches ; avec branches aussi.
+        if ($pushKeys.Count -eq 0) { return $true }
+        if ($pushKeys -contains 'branches' -or $pushKeys -contains 'branches-ignore') { return $true }
+    }
+
+    return $false
+}
+
 $PracticeEvaluators = @{
 
     # META-01 -- Description du dépôt renseignée.
@@ -383,6 +439,39 @@ $PracticeEvaluators = @{
         }
 
         return New-PracticeResult -Status 'KO' -Note 'TOOL-01: aucun fichier d''instructions IA'
+    }
+
+    # CI-01 -- CI configuree : build et tests sur push ou PR.
+    # Une CI externe compte : Xcode Cloud et consorts publient des check-runs,
+    # seule trace de leur existence. Le script ne peut en revanche pas savoir
+    # qu'un depot de distribution n'attend aucune CI -- c'est un NA de contexte.
+    'CI-01' = {
+        param($Snapshot)
+
+        # La CI du depot d'abord : c'est le cas courant, et un depot peut avoir
+        # les deux (clepsydre a ios.yml ET Xcode Cloud). La CI externe n'est
+        # examinee qu'a defaut, pour que la note dise la bonne chose.
+        $workflows = @($Snapshot.Workflows | Where-Object { $_ })
+        $running = @($workflows | Where-Object { Test-WorkflowRunsOnPushOrPullRequest -Content $_.Content })
+
+        if ($running.Count -gt 0) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        $external = @($Snapshot.CheckRunApps | Where-Object { $_ -and $_ -ne 'GitHub Actions' })
+        if ($external.Count -gt 0) {
+            return New-PracticeResult -Status 'OK' `
+                -Note "CI-01: aucun workflow declenche sur push ou PR, mais CI externe attestee par check-run -- $($external -join ', ')"
+        }
+
+        if ($workflows.Count -gt 0) {
+            $names = @($workflows | ForEach-Object { $_.Name })
+            return New-PracticeResult -Status 'KO' `
+                -Note "CI-01: $($names -join ', ') ne se declenche(nt) ni sur push de branche ni sur pull request"
+        }
+
+        return New-PracticeResult -Status 'KO' `
+            -Note 'CI-01: aucun workflow dans le depot et aucun check-run d''une CI externe'
     }
 
     # CI-02 -- Required status checks sur la branche protegee.
