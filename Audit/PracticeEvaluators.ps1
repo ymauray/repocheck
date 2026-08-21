@@ -585,4 +585,80 @@ $PracticeEvaluators = @{
         return New-PracticeResult -Status 'KO' `
             -Note "CI-04: action(s) tierce(s) non epinglee(s) a un SHA -- $($loose -join ', ')"
     }
+
+    # CI-06 -- Coherence des tags Git : uniquement vX.Y.Z.
+    # Aucun tag n'est pas un echec, c'est une absence d'objet a evaluer.
+    'CI-06' = {
+        param($Snapshot)
+
+        $tags = @($Snapshot.Tags | Where-Object { $_ })
+        if ($tags.Count -eq 0) {
+            return New-PracticeResult -Status 'NA' -Note 'CI-06: N/A, aucun tag a evaluer'
+        }
+
+        $offending = @($tags | Where-Object { $_ -notmatch '^v\d+\.\d+\.\d+$' })
+        if ($offending.Count -eq 0) {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        $sample = @($offending | Select-Object -First 3)
+        $note = "CI-06: $($offending.Count) tag(s) hors format vX.Y.Z sur $($tags.Count) -- $($sample -join ', ')"
+        if ($offending.Count -gt $sample.Count) { $note = "$note..." }
+
+        return New-PracticeResult -Status 'KO' -Note $note
+    }
+
+    # CI-07 -- Permissions par defaut des workflows en lecture seule.
+    'CI-07' = {
+        param($Snapshot)
+
+        $permissions = $Snapshot.WorkflowPermissions
+        if (-not $permissions -or -not $permissions.default_workflow_permissions) {
+            return New-PracticeResult -Status 'KO' `
+                -Note 'CI-07: permissions par defaut des workflows illisibles'
+        }
+
+        if ($permissions.default_workflow_permissions -eq 'read') {
+            return New-PracticeResult -Status 'OK'
+        }
+
+        $note = "CI-07: default_workflow_permissions=$($permissions.default_workflow_permissions)"
+        if ($permissions.can_approve_pull_request_reviews) {
+            $note = "$note et can_approve_pull_request_reviews=true"
+        }
+
+        return New-PracticeResult -Status 'KO' -Note $note
+    }
+
+    # META-08 -- Badges de statut dans le README.
+    # « Badge » n'est pas une notion formelle : on reconnait les fournisseurs
+    # usuels plutot que toute image, car un README peut contenir une capture
+    # d'ecran ou un logo sans pour autant afficher le moindre badge. Liste a
+    # etendre si un nouveau fournisseur apparait.
+    'META-08' = {
+        param($Snapshot)
+
+        if (-not $Snapshot.Readme) {
+            return New-PracticeResult -Status 'KO' -Note 'META-08: aucun README, donc aucun badge'
+        }
+
+        $providers = @(
+            'shields\.io',
+            'badgen\.net',
+            'forthebadge\.com',
+            'badge\.svg',
+            'github-readme-stats',
+            'codecov\.io',
+            'coveralls\.io'
+        ) -join '|'
+
+        $images = [regex]::Matches($Snapshot.Readme, '!\[[^\]]*\]\(([^)]+)\)')
+        foreach ($image in $images) {
+            if ($image.Groups[1].Value -match $providers) {
+                return New-PracticeResult -Status 'OK'
+            }
+        }
+
+        return New-PracticeResult -Status 'KO' -Note 'META-08: aucun badge de statut dans le README'
+    }
 }
