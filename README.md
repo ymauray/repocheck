@@ -20,21 +20,44 @@ Trois éléments distincts :
 
 ## Auditer un dépôt
 
+L'audit se fait en trois temps : le script établit ce qui se lit dans l'API, un agent tranche ce qui demande un jugement, le script produit les rapports.
+
+### 1. Collecte automatique
+
 ```powershell
 ./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo
+```
+
+Interroge GitHub via `gh` et remplit la matrice. Le dépôt n'a pas besoin d'y figurer au préalable : une ligne est créée.
+
+**`-Audit` évalue 30 des 35 pratiques.** Les cinq autres — META-04, META-06, META-09, CI-05, SEC-03 — demandent un jugement qu'une lecture d'API ne rend pas : la complétude d'un README, la pertinence d'un `.gitignore`, l'existence d'une chaîne de release externe. Elles restent vides, apparaissent en `❔` dans le rapport, et sont **exclues du score**.
+
+Deux limites à connaître :
+
+- **`-Audit` ne pose jamais de `NA` de contexte.** Il ne peut pas savoir qu'un dépôt est une page de profil ou un tap Homebrew, et marquera donc `KO` des pratiques qui n'ont aucun objet.
+- **La colonne `Notes` n'est jamais réécrite.** Les notes produites par `-Audit` vont à la console ; celles de la matrice sont à vous.
+
+### 2. Passe de jugement (optionnelle selon le dépôt)
+
+Dans une session Claude Code, en s'appuyant sur [`docs/cahier-des-charges-agent.md`](docs/cahier-des-charges-agent.md) :
+
+> Complète les `❔` de `owner/repo` et vérifie les `NA` de contexte, selon le cahier des charges.
+
+C'est la moitié de l'outil qui ne tient pas dans une ligne de commande : elle demande une session, pas un terminal.
+
+**Quand elle est nécessaire :** sur un dépôt atypique — page de profil, tap, cible de distribution —, où le script marque `KO` des pratiques sans objet et fausse le score dans le mauvais sens.
+
+**Quand elle est optionnelle :** sur un dépôt applicatif ordinaire. Les cinq `❔` y sont 🟠 ou 🟡, exclues du calcul, et le script ne produit pas de faux `NA`.
+
+Mesuré sur trois dépôts, cette passe reproduit la référence à 35/35, deux exécutions indépendantes donnant le même résultat. Le protocole et les chiffres sont dans le cahier des charges.
+
+### 3. Rapports
+
+```powershell
 ./Invoke-RepoCheck.ps1 -Reports -Summary
 ```
 
-Le premier appel interroge GitHub via `gh` et remplit la matrice ; le second produit les rapports. Le dépôt n'a pas besoin d'y figurer au préalable : une ligne est créée.
-
-**`-Audit` évalue 30 des 35 pratiques du catalogue.** Les cinq autres demandent un jugement qu'une lecture d'API ne rend pas — la complétude d'un README, la pertinence d'un `.gitignore`, l'existence d'une chaîne de release externe. Elles restent vides dans la matrice, apparaissent en `❔` dans le rapport, sont **exclues du score**, et sont listées sous « Restent à évaluer à la main ». Les renseigner consiste à éditer la colonne correspondante du CSV.
-
-Deux points de vigilance, hérités de l'expérience :
-
-- **`-Audit` ne pose jamais de `NA` de contexte.** Il ne peut pas savoir qu'un dépôt est une page de profil ou un tap Homebrew, et marquera donc `KO` des pratiques qui n'ont aucun objet. Relire les `KO` d'un dépôt atypique avant de les prendre pour argent comptant.
-- **La colonne `Notes` n'est jamais réécrite.** Les notes produites par `-Audit` vont à la console ; celles de la matrice sont à vous.
-
-Pour rejouer une évaluation sans réinterroger GitHub — utile pour itérer :
+Pour rejouer une collecte sans réinterroger GitHub — utile pour itérer :
 
 ```powershell
 ./Invoke-RepoCheck.ps1 -Audit -Repo owner/repo -SnapshotCacheDir .cache
