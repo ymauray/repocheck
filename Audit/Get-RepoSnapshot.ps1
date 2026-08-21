@@ -147,7 +147,7 @@ function Get-RepoSnapshot {
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 7
+    $schemaVersion = 8
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -231,6 +231,24 @@ function Get-RepoSnapshot {
 
     $workflows = Get-RepoWorkflow -Repo $Repo
 
+    # Les CI externes (Xcode Cloud, Codemagic...) publient des check-runs sur les
+    # commits. C'est le seul signal fiable de leur existence : elles n'ont ni
+    # fichier de workflow, ni entree dans actions/workflows.
+    # Ne pas passer --jq a Invoke-GhJson : la sortie serait une chaine brute et
+    # non du JSON. On recupere l'objet et on le traite ici.
+    $checkRunApps = @()
+    $head = Invoke-GhJson -Arguments @('api', "repos/$Repo/commits?per_page=1")
+    if ($head -and @($head).Count -gt 0 -and @($head)[0].sha) {
+        $sha = @($head)[0].sha
+        $checks = Invoke-GhJson -Arguments @('api', "repos/$Repo/commits/$sha/check-runs")
+        if ($checks -and $checks.check_runs) {
+            $checkRunApps = @($checks.check_runs |
+                ForEach-Object { $_.app.name } |
+                Where-Object { $_ } |
+                Sort-Object -Unique)
+        }
+    }
+
     # --paginate : nannyplus a plus de tags qu'une page n'en rend, et un tag hors
     # semver pourrait se cacher au-dela de la premiere.
     $tags = @()
@@ -264,6 +282,7 @@ function Get-RepoSnapshot {
         Workflows     = $workflows
         Tags          = $tags
         Readme        = $readme
+        CheckRunApps  = $checkRunApps
         HasPages      = $hasPages
         WorkflowPermissions = $workflowPermissions
     }

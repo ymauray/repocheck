@@ -80,6 +80,13 @@ mouvant. Il n'en est pas dispensé.
 **3. Sinon → `KO`,** sauf si l'appliquer ne produirait aucun effet, auquel cas
 `NA`.
 
+**Critère de permanence.** Le `NA` de l'étape 3 suppose que l'absence soit
+**structurelle**, pas transitoire. Un tap Homebrew n'aura *jamais* de manifest
+reconnu par Dependabot : `NA`. Une application Swift qui n'a pas encore de
+dépendance externe en gagnera une au premier `Package.resolved` : `KO`, car
+l'écosystème est reconnu et l'absence n'est qu'un état du jour. Poser `NA` sur
+une absence temporaire fige une exemption qui deviendra fausse en silence.
+
 Activer Dependabot alerts sur `homebrew-tap` : le réglage existe bien, mais
 aucun manifest reconnu par Dependabot n'est présent, l'activation ne produirait
 rien → `NA`. Activer le secret scanning sur un dépôt de profil : ça marche et ça
