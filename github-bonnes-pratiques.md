@@ -12,10 +12,10 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | META-02 | Topics renseignés | 🟡 | Améliore la découvrabilité via la recherche GitHub. |
 | META-03 | LICENSE présente | 🔴 | Sans licence explicite, le code est "tous droits réservés" par défaut, personne ne peut légalement le réutiliser. |
 | META-04 | README complet (install, usage, contribution) | 🟠 | C'est le point d'entrée de tout nouveau lecteur ou contributeur. |
-| META-05 | Homepage URL renseignée | ⚪ | Utile seulement si un site/doc dédié existe. |
-| META-06 | `.gitignore` adapté au langage | 🟡 | Évite de committer des artefacts de build ou fichiers locaux. |
+| META-05 | Homepage URL renseignée | ⚪ | Ne s'évalue que si un site ou une documentation dédiés existent. Sans cible à pointer, la pratique est **sans objet** : `NA`. Un site qui existe — GitHub Pages actif, déploiement documenté — mais dont l'URL n'est pas renseignée vaut `KO`, de même qu'une homepage pointant sur le dépôt lui-même, qui n'oriente vers rien. |
+| META-06 | `.gitignore` adapté au langage | 🟡 | Évite de committer des artefacts de build ou fichiers locaux. `NA` sur un dépôt purement déclaratif, qui ne produit aucun artefact et n'a pas d'outillage local laissant des traces — il n'y a alors rien à ignorer. |
 | META-07 | `.editorconfig` présent | 🟡 | Garantit un style de code cohérent entre éditeurs/contributeurs. |
-| META-08 | Badges de statut dans le README (build, licence, version...) | ⚪ | Repère visuel rapide de l'état du projet, purement cosmétique — sans impact sur la qualité ou la sécurité. |
+| META-08 | Badges de statut dans le README (build, licence, version...) | ⚪ | Repère visuel rapide de l'état du projet, purement cosmétique — sans impact sur la qualité ou la sécurité. Sans README du tout, la pratique est **sans objet** : `NA`, car le manquement est déjà compté par META-04 et ne doit pas l'être deux fois. |
 | META-09 | Le README documente la chaîne CI/CD réelle, outils externes compris | 🟡 | Une release assurée par un outil externe (Xcode Cloud, Codemagic, Bitrise...) ne laisse aucune trace vérifiable via `gh api` : sans mention dans le README, un lecteur — humain ou automatique — conclut à tort que le projet n'a ni intégration continue ni release. Vaut aussi pour la frontière entre ce que fait la CI du dépôt et ce que fait l'outil externe. |
 
 ## Fichiers communautaires / gouvernance
@@ -27,15 +27,15 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | GOV-03 | `SECURITY.md` (politique de sécurité) | 🟠 | Indique comment signaler une vulnérabilité de façon responsable plutôt que par une issue publique. |
 | GOV-04 | Template(s) d'issue | 🟡 | Standardise les rapports de bug/demandes de fonctionnalité reçus. |
 | GOV-05 | Template de pull request | 🟡 | Rappelle une checklist (tests, changelog...) à chaque PR. |
-| GOV-06 | `CODEOWNERS` | ⚪ | Peu utile en mainteneur unique, pertinent si des reviewers dédiés apparaissent. |
-| GOV-07 | Discussions activées | ⚪ | Pertinent seulement si un canal Q&A/communauté est souhaité. |
+| GOV-06 | `CODEOWNERS` | ⚪ | Sans reviewer dédié, un `CODEOWNERS` ne déclenche aucune demande de revue : marquer `NA` en mainteneur unique, **comme BR-04**, dont la condition est identique. Pertinent dès que des reviewers apparaissent. |
+| GOV-07 | Discussions activées | ⚪ | Canal Q&A distinct des issues. Le souhait du mainteneur n'étant pas observable, la pratique s'évalue sur le fait et non sur l'intention : Discussions désactivées vaut `KO`. |
 | GOV-08 | `SUPPORT.md` (où obtenir de l'aide) | 🟡 | Fichier communautaire reconnu par GitHub (Insights → Community Standards), distinct de `CONTRIBUTING`/`SECURITY` — indique où poser des questions plutôt que d'ouvrir une issue. |
 
 ## CI/CD et releases
 
 | ID | Pratique | Criticité | Commentaire |
 |---|---|---|---|
-| CI-01 | CI configurée (build + tests sur push/PR) | 🔴 | Détecte les régressions avant qu'elles n'atteignent la branche par défaut. |
+| CI-01 | CI configurée (build + tests sur push/PR) | 🔴 | Détecte les régressions avant qu'elles n'atteignent la branche par défaut. Aucune CI n'est attendue sur un **dépôt de distribution** (tap Homebrew, bucket Scoop) : il n'y héberge aucun code à construire, la pratique y est `NA`, de même que CI-02 qui en dépend. |
 | CI-02 | Required status checks sur la branche protégée | 🔴 | Sans ça, une PR peut être mergée même si la CI échoue — la protection de branche ne sert plus à rien pour la qualité du code. |
 | CI-03 | `permissions:` explicite et minimal dans chaque workflow | 🟠 | Sans ce bloc, le workflow hérite du défaut du dépôt, potentiellement plus large que nécessaire. |
 | CI-04 | Actions tierces épinglées à un SHA (pas juste un tag mouvant) | 🔴 | Ne vise que les actions **hors org `actions/`** : un tag `@vN` peut être repointé par le mainteneur de l'action (cf. `tj-actions/changed-files`, mars 2025, secrets exfiltrés depuis des milliers de dépôts), un SHA garantit l'immuabilité. Le critère retenu est la **propriété de l'action**, pas la présence de secrets dans le workflow : un workflow peut gagner un secret plus tard sans que personne ne repasse vérifier l'épinglage, alors que le propriétaire de l'action ne change pas. Les actions `actions/*` peuvent rester sur un tag majeur — les compromettre suppose de compromettre GitHub, qui fournit déjà le runner et frappe le `GITHUB_TOKEN`. **Prérequis** : SEC-03 doit couvrir l'écosystème `github-actions`, faute de quoi les SHA épinglés pourrissent en silence et l'on troque un risque de chaîne d'approvisionnement contre un risque de version obsolète. |
@@ -51,7 +51,7 @@ Légende criticité : 🔴 Haute · 🟠 Moyenne · 🟡 Faible · ⚪ Optionnel
 | BR-02 | Suppression auto des branches mergées | ⚪ | Purement cosmétique/hygiène, évite l'accumulation de branches obsolètes. |
 | BR-03 | Méthode de merge unique et cohérente (squash *ou* rebase *ou* merge commit) | ⚪ | Sans convention, l'historique devient hétérogène d'une PR à l'autre. |
 | BR-04 | Revues obligatoires avant merge | ⚪ | Non pertinent en mainteneur unique sans co-reviewer humain régulier — marquer N/A dans ce cas. |
-| BR-05 | Protection appliquée aussi aux administrateurs (`enforce_admins`) | 🔴 | Sans ça, un compte admin peut contourner force-push interdit, required status checks et toute autre règle de protection configurée. |
+| BR-05 | Protection appliquée aussi aux administrateurs (`enforce_admins`) | 🔴 | Sans ça, un compte admin peut contourner force-push interdit, required status checks et toute autre règle de protection configurée. S'évalue **indépendamment de BR-01** : une branche non protégée échoue aux deux, délibérément, car ce sont deux réglages distincts à corriger. |
 
 ## Sécurité (fonctionnalités gratuites sur dépôt public)
 

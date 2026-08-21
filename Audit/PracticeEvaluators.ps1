@@ -218,17 +218,24 @@ $PracticeEvaluators = @{
             $homepage = ([string]$Snapshot.View.homepageUrl).Trim().TrimEnd('/')
         }
 
-        if (-not $homepage) {
-            return New-PracticeResult -Status 'KO' -Note 'META-05: aucune homepage'
-        }
-
         $selfUrl = "https://github.com/$($Snapshot.Repo)"
-        if ($homepage -eq $selfUrl) {
-            return New-PracticeResult -Status 'KO' `
-                -Note "META-05: homepage auto-referente ($homepage), aucun site ni doc dedie"
+
+        # Une homepage renseignee et pointant ailleurs que sur le depot : un site
+        # existe et il est lie.
+        if ($homepage -and $homepage -ne $selfUrl) {
+            return New-PracticeResult -Status 'OK'
         }
 
-        return New-PracticeResult -Status 'OK'
+        # Sinon, la pratique ne se pose que si un site existe malgre tout.
+        if ($Snapshot.HasPages) {
+            $cause = 'champ homepage vide'
+            if ($homepage) { $cause = "homepage auto-referente ($homepage)" }
+            return New-PracticeResult -Status 'KO' `
+                -Note "META-05: GitHub Pages actif mais $cause, le site n'est pas lie depuis le depot"
+        }
+
+        return New-PracticeResult -Status 'NA' `
+            -Note 'META-05: N/A, aucun site ni documentation dedies a pointer'
     }
 
     # GOV-07 -- Discussions activées.
@@ -333,6 +340,15 @@ $PracticeEvaluators = @{
 
     'GOV-06' = {
         param($Snapshot)
+
+        # Meme condition que BR-04 : sans reviewer dedie, un CODEOWNERS ne
+        # declenche aucune demande de revue.
+        $humans = @($Snapshot.Collaborators | Where-Object { $_ -and -not $_.IsBot })
+        if ($humans.Count -le 1) {
+            return New-PracticeResult -Status 'NA' `
+                -Note 'GOV-06: N/A, mainteneur unique, aucun reviewer dedie a designer'
+        }
+
         return New-FilePresenceResult -Snapshot $Snapshot -Pattern '^CODEOWNERS$' `
             -MissingNote 'GOV-06: pas de CODEOWNERS'
     }
@@ -638,8 +654,11 @@ $PracticeEvaluators = @{
     'META-08' = {
         param($Snapshot)
 
+        # Sans README, le manquement est deja compte par META-04 : ne pas le
+        # compter deux fois.
         if (-not $Snapshot.Readme) {
-            return New-PracticeResult -Status 'KO' -Note 'META-08: aucun README, donc aucun badge'
+            return New-PracticeResult -Status 'NA' `
+                -Note 'META-08: N/A, aucun README, le manquement releve de META-04'
         }
 
         $providers = @(

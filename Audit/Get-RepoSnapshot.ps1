@@ -147,7 +147,7 @@ function Get-RepoSnapshot {
 
     # Incrémenter à chaque ajout de données collectées : un instantané mis en
     # cache avec un schéma plus ancien est ignoré plutôt que relu incomplet.
-    $schemaVersion = 6
+    $schemaVersion = 7
 
     $cacheFile = $null
     if ($CacheDir) {
@@ -248,6 +248,10 @@ function Get-RepoSnapshot {
         $readme = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($clean))
     }
 
+    # has_pages sert a META-05 : c'est le seul signal d'API attestant qu'un site
+    # dedie existe. Il vient du meme appel que security_and_analysis.
+    $hasPages = [bool]($repoApi -and $repoApi.has_pages)
+
     $snapshot = [pscustomobject]@{
         Repo          = $Repo
         SchemaVersion = $schemaVersion
@@ -260,6 +264,7 @@ function Get-RepoSnapshot {
         Workflows     = $workflows
         Tags          = $tags
         Readme        = $readme
+        HasPages      = $hasPages
         WorkflowPermissions = $workflowPermissions
     }
 
