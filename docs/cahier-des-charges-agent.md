@@ -56,8 +56,17 @@ d'objet dans ce dépôt**.
 
 ### 4.2 Le test décisif du `NA`
 
-> **Si le mainteneur appliquait cette pratique, est-ce que ça produirait un
-> effet ?**
+Deux questions, **dans cet ordre**. Les intervertir fait basculer en `NA` des
+pratiques qui sont en réalité respectées.
+
+**1. La pratique est-elle respectée ?** Si oui → `OK`, et on s'arrête là.
+
+Un dépôt qui n'utilise aucune action tierce **respecte** CI-04 : il n'a aucune
+action non épinglée. Il n'en est pas dispensé. Appliquer une pratique déjà
+satisfaite ne produit évidemment aucun effet — ce n'est pas pour autant un `NA`.
+
+**2. Seulement si elle ne l'est pas :** si le mainteneur appliquait cette
+pratique, est-ce que ça produirait un effet ?
 
 - Non → `NA`. Activer Dependabot alerts sur `homebrew-tap` : aucun manifest
   reconnu par Dependabot n'y existe, l'activation ne produirait rien.
