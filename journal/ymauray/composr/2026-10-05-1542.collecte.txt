@@ -1,0 +1,312 @@
+# Collecte repocheck — ymauray/composr
+Date : 2026-10-05T13:42:03Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":false,"allow_rebase_merge":false,"allow_squash_merge":true,"archived":false,"default_branch":"main","delete_branch_on_merge":true,"description":"Génère des livres PDF et EPUB à partir de documents Word (.docx).","fork":false,"full_name":"ymauray/composr","has_discussions":true,"has_issues":true,"has_pages":false,"has_wiki":false,"homepage":null,"license":"GPL-3.0","owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"enabled"},"secret_scanning":{"status":"enabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"enabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":["cli","docx","ebook","epub","pdf","publishing","typescript"],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 36
+
+### Racine
+file	.editorconfig
+file	.gitattributes
+dir	.github
+file	.gitignore
+file	AGENTS.md
+file	CLAUDE.md
+file	CODE_OF_CONDUCT.md
+file	CONTRIBUTING.md
+file	COPYING
+file	README.md
+file	SECURITY.md
+dir	assets
+file	docx2pdf.ps1
+file	docx2pdf.scpt
+file	index.ts
+file	package-lock.json
+file	package.json
+file	settings-sample.ts
+dir	src
+file	tsconfig.json
+
+### Fichiers de configuration, communautaires et manifestes
+.editorconfig
+.gitattributes
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+.github/SUPPORT.md
+.github/dependabot.yml
+.github/pull_request_template.md
+.github/workflows/ci.yml
+.github/workflows/release.yml
+.gitignore
+AGENTS.md
+CLAUDE.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+COPYING
+README.md
+SECURITY.md
+package.json
+
+===== [repocheck] README =====
+
+~~~~markdown
+# 📚 Composr
+
+[![CI](https://github.com/ymauray/composr/actions/workflows/ci.yml/badge.svg)](https://github.com/ymauray/composr/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ymauray/composr)](https://github.com/ymauray/composr/releases/latest)
+[![Licence : GPL v3](https://img.shields.io/github/license/ymauray/composr)](COPYING)
+
+Bienvenue sur **Composr** ! Ce projet permet de générer facilement des fichiers PDF et EPUB à partir de documents Word (.docx) avec des options de personnalisation avancées. Idéal pour l'édition, l'auto-publication ou la création de supports professionnels.
+
+## 🚀 Fonctionnalités principales
+
+- 📄 Conversion de fichiers `.docx` en PDF et EPUB
+- 🎨 Personnalisation des styles et de la mise en page
+- 🖼️ Gestion des couvertures et des images
+- 📑 Génération automatique de la table des matières
+- 🛠️ Prise en charge de plusieurs formats de page (A4, Half-Letter, etc.)
+- 🔄 Scripts d'automatisation pour la conversion
+
+## 📂 Structure du projet
+
+```
+├── assets/                # Modèles et ressources (CSS, ejs)
+├── sources/               # Sources de documents par projet
+├── src/                   # Code source TypeScript
+├── temp/                  # Fichiers temporaires
+├── index.ts               # Point d'entrée principal
+├── package.json           # Dépendances et scripts npm
+├── README.md              # Ce fichier 😄
+```
+
+## ⚡ Installation
+
+1. Clonez ce dépôt :
+   ```sh
+   git clone https://github.com/ymauray/composr.git
+   cd composr
+   ```
+2. Installez les dépendances :
+   ```sh
+   npm install
+   ```
+
+## 🛠️ Utilisation
+
+1. Placez vos fichiers `.docx` dans le dossier `sources/<votre-projet>/`.
+2. Configurez les options dans `settings.ts` du projet concerné.
+3. Lancez la génération :
+   ```sh
+   npx tsx ./index.ts --source <votre-projet> --with-pdf
+   ```
+4. Les fichiers PDF et EPUB seront générés à l'endroit indiqué dans les fichier `settings.ts` de la source.
+
+## 📝 Exemple de configuration
+
+Voir `settings-sample.ts` pour un exemple de configuration personnalisée.
+
+## ⚙️ Intégration continue et releases
+
+Tout passe par GitHub Actions, sans outil externe :
+
+- **CI** (`.github/workflows/ci.yml`) : à chaque push et pull request vers `main`, installe les dépendances (`npm ci`) et vérifie les types (`npm run typecheck`). Il n'y a pas encore de tests automatisés, et la conversion PDF (qui exige Microsoft Word) n'est pas testée en CI.
+- **Release** (`.github/workflows/release.yml`) : à chaque push sur `main`, crée le tag `v<version>` et la release GitHub correspondant au champ `version` de `package.json`, s'ils n'existent pas encore. Publier une version revient donc à incrémenter `version`.
+- **Dependabot** : mises à jour hebdomadaires des dépendances npm et des actions GitHub.
+
+Aucun paquet n'est publié sur npm : la release GitHub ne contient que le code source.
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! Consultez [`CONTRIBUTING.md`](CONTRIBUTING.md) avant d'ouvrir une issue ou une pull request.
+
+## 📄 Licence
+
+Ce projet est sous licence **GNU GPL v3**. Voir le fichier `COPYING` pour plus d'informations.
+
+---
+
+
+✨ Bon usage de Composr !
+
+## 📦 Dépendances principales
+
+- [docx](https://github.com/dolanmiu/docx) – Génération de documents Word
+- [epub-gen](https://github.com/cyrilis/epub-gen) – Génération de fichiers EPUB
+- [cheerio](https://github.com/cheeriojs/cheerio) – Manipulation du HTML côté serveur
+- [mammoth](https://github.com/mwilliamson/mammoth.js) – Conversion de DOCX vers HTML
+- [yargs](https://github.com/yargs/yargs) – Parsing des arguments en ligne de commande
+- [ejs](https://github.com/mde/ejs) – Templates HTML dynamiques
+~~~~
+
+===== [repocheck] Workflows =====
+
+### .github/workflows/ci.yml
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Dépendances
+        run: npm ci
+
+      - name: Vérification des types
+        run: npm run typecheck
+```
+### .github/workflows/release.yml
+```yaml
+name: Release
+
+# Publie la version déclarée dans package.json : à chaque push sur main,
+# crée le tag vX.Y.Z et sa release s'ils n'existent pas encore.
+# Publier une version revient donc à incrémenter `version` dans package.json.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Publier la version de package.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          if ! printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version invalide dans package.json : $version"
+            exit 1
+          fi
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag est déjà publiée."
+            exit 0
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "Composr $tag" --generate-notes
+```
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+# CLAUDE.md
+
+Les consignes de ce projet sont dans `AGENTS.md`, communes à tous les agents de code.
+
+@AGENTS.md
+
+AGENTS.md : présent à la racine
+
+===== [repocheck] .gitattributes (META-10) =====
+
+* text=auto eol=lf
+*.ps1 text eol=crlf
+
+Scripts Windows (.bat/.cmd) : 0
+
+===== [repocheck] dependabot.yml =====
+
+# Create a dependabot.yml file in the .github directory to configure Dependabot for your repository.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "fix(deps)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(ci)"
+
+===== [repocheck] Protection de branche classique (main) =====
+
+{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection","required_status_checks":{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/required_status_checks","strict":false,"contexts":["Typecheck"],"contexts_url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/required_status_checks/contexts","checks":[{"context":"Typecheck","app_id":15368}]},"required_signatures":{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/required_signatures","enabled":false},"enforce_admins":{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/enforce_admins","enabled":true},"required_linear_history":{"enabled":false},"allow_force_pushes":{"enabled":false},"allow_deletions":{"enabled":false},"block_creations":{"enabled":false},"required_conversation_resolution":{"enabled":false},"lock_branch":{"enabled":false},"allow_fork_syncing":{"enabled":false}}
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":true,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":true}
+
+===== [repocheck] Tags (100 premiers) =====
+
+v1.0.0	sur main
+
+===== [repocheck] Releases (10 dernières) =====
+
+v1.0.0	Composr v1.0.0	2026-10-05T13:39:49Z	prerelease=false
+
+===== [repocheck] GitHub Pages =====
+
+ÉCHEC HTTP 404 : {"message":"Not Found","documentation_url":"https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site","status":"404"}gh: Not Found (HTTP 404)
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+Release	success	app=github-actions
+Typecheck	success	app=github-actions
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+
