@@ -1,0 +1,194 @@
+# Collecte repocheck — ymauray/repocheck
+Date : 2026-10-05T10:06:58Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":false,"allow_rebase_merge":false,"allow_squash_merge":true,"archived":false,"default_branch":"main","delete_branch_on_merge":true,"description":"Audite des depots GitHub par rapport a un referentiel de bonnes pratiques et genere des rapports de conformite.","fork":false,"full_name":"ymauray/repocheck","has_discussions":false,"has_issues":true,"has_pages":false,"has_wiki":true,"homepage":null,"license":null,"owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"enabled"},"secret_scanning":{"status":"enabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"enabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":["audit","best-practices","devops","github","github-api","powershell"],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 39
+
+### Racine
+dir	.claude-plugin
+file	.gitattributes
+file	README.md
+dir	docs
+dir	journal
+dir	skills
+
+### Fichiers de configuration, communautaires et manifestes
+.gitattributes
+README.md
+skills/repocheck/templates/.editorconfig
+skills/repocheck/templates/.gitattributes
+skills/repocheck/templates/.github/SUPPORT.md
+skills/repocheck/templates/.github/pull_request_template.md
+skills/repocheck/templates/CLAUDE.md
+skills/repocheck/templates/CONTRIBUTING.md
+skills/repocheck/templates/README.md
+skills/repocheck/templates/SECURITY.md
+
+===== [repocheck] README =====
+
+~~~~markdown
+# repocheck
+
+Plugin Claude Code qui audite la conformité de dépôts GitHub à un référentiel de bonnes pratiques, calcule un score, propose un plan d'action, applique les actions validées et trace tout dans un journal.
+
+## Contenu
+
+```
+.claude-plugin/          manifeste du plugin et marketplace locale
+skills/repocheck/
+  SKILL.md               déroulé du skill
+  references/
+    BONNES-PRATIQUES.md  le référentiel (36 pratiques, versionné)
+    remediation.md       comment corriger chaque pratique
+    journal.md           format du journal de traçabilité
+  scripts/
+    collect.sh           collecte des signaux via gh api (lecture seule)
+    score.sh             calcul du score, poids lus dans le référentiel
+  templates/             modèles de fichiers communautaires
+journal/                 journaux d'audit (INDEX.md, RETOURS.md, un dossier par dépôt)
+docs/archives/           référentiel d'origine, avant nettoyage
+```
+
+## Prérequis
+
+- Claude Code
+- [GitHub CLI](https://cli.github.com/) authentifié (`gh auth status`) avec des droits d'administration sur les dépôts à mettre en conformité. L'audit seul se contente d'un accès en lecture, mais certains réglages (protection de branche, sécurité) ne sont lisibles qu'avec les droits d'administration.
+- Bash (Git Bash sous Windows). Aucun `jq` n'est nécessaire : le filtrage passe par `gh --jq`.
+
+## Installation
+
+Dans Claude Code :
+
+```
+/plugin marketplace add C:/Users/yannick.mauray/perso/repocheck
+/plugin install repocheck@repocheck
+```
+
+Puis indiquer où écrire le journal, dans `~/.claude/settings.json` :
+
+```json
+{
+  "env": {
+    "REPOCHECK_JOURNAL": "C:/Users/yannick.mauray/perso/repocheck/journal"
+  }
+}
+```
+
+Après une modification du skill ou du référentiel, `/plugin marketplace update repocheck` recharge la version locale.
+
+## Utilisation
+
+Il suffit de demander, en langage naturel :
+
+| Demande | Effet |
+|---|---|
+| « audite ymauray/paige » | Audit et score, puis plan proposé. Rien n'est modifié. |
+| « mets ymauray/paige en conformité » | Audit, plan, validation, application, ré-audit et journal. |
+| « audite tous mes dépôts » | Audit en lot et tableau récapitulatif trié par score. |
+| « crée un dépôt conforme ymauray/nouveau » | Création, puis mise en conformité. |
+| « où en est ymauray/paige ? » | Dernier journal et historique des scores. |
+
+Garanties :
+
+- aucune modification sans validation explicite ;
+- les fichiers passent toujours par une PR, que le skill ne merge jamais ;
+- chaque réglage modifié est consigné avec son état avant, son état après et sa commande de retour arrière ;
+- les actions irréversibles (suppression de tags) demandent une confirmation une par une.
+
+Les scripts sont aussi utilisables seuls :
+
+```sh
+bash skills/repocheck/scripts/collect.sh owner/repo > collecte.txt
+bash skills/repocheck/scripts/score.sh statuts.txt   # une ligne « ID OK|KO|NA » par pratique
+```
+
+## Faire évoluer le référentiel
+
+Le référentiel est versionné (en tête de `BONNES-PRATIQUES.md`), et chaque journal indique la version utilisée.
+
+1. Les remarques faites pendant les audits sont consignées dans `journal/RETOURS.md`.
+2. Une règle modifiée ou ajoutée incrémente la version mineure ; une simple précision, la version de correctif.
+3. Ajouter une pratique : une ligne dans le tableau de sa catégorie (ID, pratique, criticité en emoji, évaluation, justification) et une entrée dans `remediation.md`. `score.sh` la prend en compte automatiquement.
+
+## Score
+
+Les poids sont : 🔴 4 · 🟠 2 · 🟡 1 · ⚪ 0,5. Le score vaut poids OK ÷ (poids OK + poids KO) × 100 ; les `NA` sont exclus. Une dérogation acceptée reste `KO` : elle n'améliore pas le score, mais l'action n'est plus proposée.
+~~~~
+
+===== [repocheck] Workflows =====
+
+(aucun workflow)
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+(absent)
+
+AGENTS.md : absent de la racine
+
+===== [repocheck] .gitattributes (META-10) =====
+
+* text=auto eol=lf
+
+Scripts Windows (.bat/.cmd) : 0
+
+===== [repocheck] dependabot.yml =====
+
+(absent)
+
+===== [repocheck] Protection de branche classique (main) =====
+
+ÉCHEC HTTP 404 : {"message":"Branch not protected","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-branch-protection","status":"404"}gh: Branch not protected (HTTP 404)
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":true,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":true}
+
+===== [repocheck] Tags (100 premiers) =====
+
+(aucun tag)
+
+===== [repocheck] Releases (10 dernières) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] GitHub Pages =====
+
+ÉCHEC HTTP 404 : {"message":"Not Found","documentation_url":"https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site","status":"404"}gh: Not Found (HTTP 404)
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+(succès, réponse vide ou liste vide)
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+

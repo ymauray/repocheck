@@ -16,6 +16,17 @@ $REPOCHECK_JOURNAL/
     └── <AAAA-MM-JJ-HHMM>.collecte.txt  # sortie brute de collect.sh (preuve)
 ```
 
+### Livraison du journal
+
+Quand `$REPOCHECK_JOURNAL` est dans un dépôt Git dont la branche par défaut est protégée (c'est le cas du dépôt repocheck), le journal ne peut pas y être commité directement. À la fin de chaque exécution :
+
+1. Depuis la racine de ce dépôt, à jour de sa branche par défaut, créer la branche `journal/<AAAA-MM-JJ-HHMM>-<repo>`.
+2. N'ajouter **que les fichiers de l'exécution** : son journal, ses collectes, et les modifications d'`INDEX.md`, de `RETOURS.md` et de `DEROGATIONS.md`. Un seul commit : `journal: <owner/repo> (<mode>, <AAAA-MM-JJ HH:MM>)`.
+3. Pousser, ouvrir la PR « Journal : <owner/repo> (<AAAA-MM-JJ>) », puis revenir sur la branche par défaut.
+4. Ne pas merger la PR : c'est à l'utilisateur de le faire. Donner son URL dans le résumé final.
+
+Si le dossier n'est pas versionné, ou si sa branche par défaut n'est pas protégée, cette étape ne s'applique pas.
+
 Règles :
 
 - **Ne jamais modifier une entrée passée** : un journal d'exécution n'est complété que pendant sa propre exécution. Une erreur se corrige par une nouvelle entrée.
