@@ -11,7 +11,7 @@ repocheck est un plugin Claude Code. Son skill audite des dépôts GitHub par ra
 - `skills/repocheck/scripts/collect.sh` : collecte via `gh api`, **lecture seule**.
 - `skills/repocheck/scripts/score.sh` : score calculé à partir des poids lus dans le référentiel.
 - `skills/repocheck/templates/` : modèles de fichiers communautaires.
-- `journal/` : historique des exécutions (`INDEX.md`, `RETOURS.md`, un dossier par dépôt).
+- `docs/RETOURS.md` : les décisions sur le référentiel et le skill.
 
 ## Règles
 
@@ -19,7 +19,7 @@ repocheck est un plugin Claude Code. Son skill audite des dépôts GitHub par ra
 - Fins de ligne LF (`.gitattributes`) : un script bash en CRLF ne s'exécute pas.
 - Scripts : bash portable (Git Bash sous Windows compris), sans `jq` externe : filtrer avec `gh --jq`. Ils doivent passer `bash -n` et `shellcheck`.
 - `collect.sh` ne modifie jamais rien. Toute écriture sur un dépôt audité passe par le skill, après validation de l'utilisateur.
-- Référentiel : toute modification incrémente sa version (`x.y.Z` précision, `x.Y.0` règle ajoutée ou modifiée), s'accompagne de l'entrée correspondante dans `remediation.md` et d'une décision dans `journal/RETOURS.md`. Le tableau garde le format `| ID | Pratique | Criticité | Évaluation | Pourquoi |`, lu par `score.sh`.
+- Référentiel : toute modification incrémente sa version (`x.y.Z` précision, `x.Y.0` règle ajoutée ou modifiée), s'accompagne de l'entrée correspondante dans `remediation.md` et d'une décision dans `docs/RETOURS.md`. Le tableau garde le format `| ID | Pratique | Criticité | Évaluation | Pourquoi |`, lu par `score.sh`.
 - Plugin : incrémenter `version` dans `.claude-plugin/plugin.json` à chaque changement publié ; le workflow `Release` publie la version au merge.
 - Journal : ne jamais modifier une entrée d'exécution passée.
 
@@ -30,7 +30,7 @@ repocheck est un plugin Claude Code. Son skill audite des dépôts GitHub par ra
 - **Au merge**, `Release` publie `v<version>` si la `version` de `.claude-plugin/plugin.json` a changé.
 - **Plugin installé** : il vient de la marketplace GitHub (`ymauray/repocheck`), pas de ce clone. Une modification ne prend effet qu'après le merge, la release et `/plugin marketplace update repocheck`, dans une nouvelle session.
 - **Tester une branche avant merge** : basculer temporairement sur la marketplace locale (`/plugin marketplace remove repocheck`, puis `/plugin marketplace add <chemin du clone>`, puis `/plugin install repocheck@repocheck`), puis revenir à `ymauray/repocheck` une fois le test terminé. Les deux marketplaces portent le même nom et ne peuvent pas coexister.
-- **Journal** : les exécutions du skill l'écrivent dans `journal/` (variable `REPOCHECK_JOURNAL`) et le livrent par une PR `journal/<horodatage>-<repo>` (étape 8 du skill).
+- **Journal** : les exécutions du skill l'écrivent en local, dans le dossier donné par `REPOCHECK_JOURNAL`, hors de ce dépôt. Il n'est pas versionné.
 - **Branche `legacy`** : ancien projet PowerShell, à ignorer. Ne pas la modifier.
 
 ## Vérifier

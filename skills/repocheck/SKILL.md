@@ -100,14 +100,7 @@ Si une action validée a échoué ou a été abandonnée, le score attendu ne se
 
 ## 7. Recueillir les retours
 
-Demander brièvement à l'utilisateur si une évaluation ou une proposition lui a paru fausse. Toute remarque qui touche une règle :
-
-1. est consignée dans le journal et dans `RETOURS.md` ;
-2. donne lieu, si l'utilisateur le souhaite, à une proposition de modification du référentiel **dans le dépôt source du plugin** (pas dans la copie installée), en incrémentant sa version : correctif → `x.y.Z`, nouvelle règle ou règle modifiée → `x.Y.0`.
-
-## 8. Livrer le journal
-
-Si le dossier du journal se trouve dans un dépôt Git dont la branche par défaut est protégée, livrer les fichiers de l'exécution par une PR, en suivant « Livraison du journal » dans `references/journal.md`. Cette étape vaut pour tous les modes, audit seul compris.
+Demander brièvement à l'utilisateur si une évaluation ou une proposition lui a paru fausse, et consigner ses remarques dans la section « Retours » du journal d'exécution. Le skill ne propose pas de lui-même de modifier le référentiel : c'est à l'utilisateur d'en faire la demande explicite.
 
 ## Création d'un dépôt
 
