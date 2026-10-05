@@ -1,0 +1,190 @@
+# Collecte repocheck — ymauray/composr
+Date : 2026-10-05T12:21:04Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":true,"allow_rebase_merge":true,"allow_squash_merge":true,"archived":false,"default_branch":"main","delete_branch_on_merge":false,"description":null,"fork":false,"full_name":"ymauray/composr","has_discussions":false,"has_issues":true,"has_pages":false,"has_wiki":false,"homepage":null,"license":"GPL-3.0","owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"disabled"},"secret_scanning":{"status":"disabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"disabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":[],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 22
+
+### Racine
+dir	.github
+file	.gitignore
+file	COPYING
+file	README.md
+dir	assets
+file	docx2pdf.ps1
+file	docx2pdf.scpt
+file	index.ts
+file	package-lock.json
+file	package.json
+file	settings-sample.ts
+dir	src
+file	tsconfig.json
+
+### Fichiers de configuration, communautaires et manifestes
+.github/dependabot.yml
+.gitignore
+COPYING
+README.md
+package.json
+
+===== [repocheck] README =====
+
+~~~~markdown
+# 📚 Composr
+
+Bienvenue sur **Composr** ! Ce projet permet de générer facilement des fichiers PDF et EPUB à partir de documents Word (.docx) avec des options de personnalisation avancées. Idéal pour l'édition, l'auto-publication ou la création de supports professionnels.
+
+## 🚀 Fonctionnalités principales
+
+- 📄 Conversion de fichiers `.docx` en PDF et EPUB
+- 🎨 Personnalisation des styles et de la mise en page
+- 🖼️ Gestion des couvertures et des images
+- 📑 Génération automatique de la table des matières
+- 🛠️ Prise en charge de plusieurs formats de page (A4, Half-Letter, etc.)
+- 🔄 Scripts d'automatisation pour la conversion
+
+## 📂 Structure du projet
+
+```
+├── assets/                # Modèles et ressources (CSS, ejs)
+├── sources/               # Sources de documents par projet
+├── src/                   # Code source TypeScript
+├── temp/                  # Fichiers temporaires
+├── index.ts               # Point d'entrée principal
+├── package.json           # Dépendances et scripts npm
+├── README.md              # Ce fichier 😄
+```
+
+## ⚡ Installation
+
+1. Clonez ce dépôt :
+   ```sh
+   git clone <url-du-repo>
+   cd composr
+   ```
+2. Installez les dépendances :
+   ```sh
+   npm install
+   ```
+
+## 🛠️ Utilisation
+
+1. Placez vos fichiers `.docx` dans le dossier `sources/<votre-projet>/`.
+2. Configurez les options dans `settings.ts` du projet concerné.
+3. Lancez la génération :
+   ```sh
+   npx tsx ./index.ts --source <votre-projet> --with-pdf
+   ```
+4. Les fichiers PDF et EPUB seront générés à l'endroit indiqué dans les fichier `settings.ts` de la source.
+
+## 📝 Exemple de configuration
+
+Voir `settings-sample.ts` pour un exemple de configuration personnalisée.
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+
+## 📄 Licence
+
+Ce projet est sous licence **GNU GPL v3**. Voir le fichier `COPYING` pour plus d'informations.
+
+---
+
+
+✨ Bon usage de Composr !
+
+## 📦 Dépendances principales
+
+- [docx](https://github.com/dolanmiu/docx) – Génération de documents Word
+- [epub-gen](https://github.com/cyrilis/epub-gen) – Génération de fichiers EPUB
+- [cheerio](https://github.com/cheeriojs/cheerio) – Manipulation du HTML côté serveur
+- [mammoth](https://github.com/mwilliamson/mammoth.js) – Conversion de DOCX vers HTML
+- [yargs](https://github.com/yargs/yargs) – Parsing des arguments en ligne de commande
+- [ejs](https://github.com/mde/ejs) – Templates HTML dynamiques
+~~~~
+
+===== [repocheck] Workflows =====
+
+(aucun workflow)
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+(absent)
+
+AGENTS.md : absent de la racine
+
+===== [repocheck] .gitattributes (META-10) =====
+
+(absent)
+
+Scripts Windows (.bat/.cmd) : 0
+
+===== [repocheck] dependabot.yml =====
+
+# Create a dependabot.yml file in the .github directory to configure Dependabot for your repository.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "fix(deps)"
+
+===== [repocheck] Protection de branche classique (main) =====
+
+{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection","required_pull_request_reviews":{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/required_pull_request_reviews","dismiss_stale_reviews":false,"require_code_owner_reviews":false,"require_last_push_approval":false,"required_approving_review_count":1},"required_signatures":{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/required_signatures","enabled":false},"enforce_admins":{"url":"https://api.github.com/repos/ymauray/composr/branches/main/protection/enforce_admins","enabled":false},"required_linear_history":{"enabled":false},"allow_force_pushes":{"enabled":false},"allow_deletions":{"enabled":false},"block_creations":{"enabled":false},"required_conversation_resolution":{"enabled":false},"lock_branch":{"enabled":false},"allow_fork_syncing":{"enabled":false}}
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+ÉCHEC HTTP 404 : {"message":"Vulnerability alerts are disabled.","documentation_url":"https://docs.github.com/rest/repos/repos#check-if-vulnerability-alerts-are-enabled-for-a-repository","status":"404"}gh: Vulnerability alerts are disabled. (HTTP 404)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":false,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":false}
+
+===== [repocheck] Tags (100 premiers) =====
+
+(aucun tag)
+
+===== [repocheck] Releases (10 dernières) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] GitHub Pages =====
+
+ÉCHEC HTTP 404 : {"message":"Not Found","documentation_url":"https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site","status":"404"}gh: Not Found (HTTP 404)
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+(succès, réponse vide ou liste vide)
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+
