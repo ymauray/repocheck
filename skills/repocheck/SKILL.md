@@ -22,13 +22,23 @@ Langue : le français, pour les échanges comme pour le journal.
 
 | Demande | Mode |
 |---|---|
-| « audite / note / vérifie owner/repo » | **audit** : étapes 1 à 4, puis proposer de passer à la mise en conformité |
-| « mets en conformité owner/repo » | **mise en conformité** : étapes 1 à 7 |
-| « audite tous mes dépôts » | **audit en lot** : étapes 1 à 3 pour chaque dépôt, puis un tableau récapitulatif trié par score croissant. Un journal par dépôt, sans plan. |
+| « audite / note / vérifie owner/repo » | **audit** : étapes 0 à 4, puis proposer de passer à la mise en conformité |
+| « mets en conformité owner/repo » | **mise en conformité** : étapes 0 à 7 |
+| « audite tous mes dépôts » | **audit en lot** : étapes 0 à 3 pour chaque dépôt, puis un tableau récapitulatif trié par score croissant. Un journal par dépôt, sans plan. |
 | « crée un dépôt conforme » | **création** : voir la section dédiée |
 | « historique / où en est owner/repo » | lire `INDEX.md` et le dernier journal du dépôt |
 
-Sans `owner/repo` explicite, utiliser le dépôt du répertoire courant (`gh repo view`). Pour un lot, utiliser `gh repo list <owner> --no-archived --source --limit 200`.
+Sans `owner/repo` explicite, utiliser le dépôt du répertoire courant (`gh repo view`). Pour un lot, utiliser `gh repo list <owner> --no-archived --source --visibility public --limit 200`.
+
+## 0. Écarter les dépôts privés
+
+Avant toute autre action, vérifier la visibilité :
+
+```bash
+gh repo view owner/repo --json visibility --jq .visibility
+```
+
+Si elle n'est pas `PUBLIC`, **ne rien faire** : ni collecte, ni journal, ni entrée dans `INDEX.md`, ni PR. Le dire à l'utilisateur en une ligne et s'arrêter. Le journal est versionné dans un dépôt public : y écrire la collecte d'un dépôt privé en publierait le contenu. `collect.sh` refuse lui aussi un dépôt non public.
 
 ## 1. Collecter
 
@@ -42,7 +52,7 @@ Si un signal manque dans la collecte (contenu d'un fichier précis, sous-dossier
 
 ## 2. Qualifier puis évaluer
 
-1. **Qualifier le dépôt** selon la typologie du référentiel : sans code, de distribution, déclaratif, mainteneur unique (un seul collaborateur avec droit d'écriture), public ou privé, archivé.
+1. **Qualifier le dépôt** selon la typologie du référentiel : sans code, de distribution, déclaratif, mainteneur unique (un seul collaborateur avec droit d'écriture), archivé.
 2. Lire `DEROGATIONS.md` du dépôt s'il existe.
 3. Évaluer **chacune** des pratiques du référentiel : statut `OK`, `KO` ou `NA`, avec les éventuels avertissements que prévoit le référentiel, plus un constat factuel d'une ligne qui cite le signal observé (« enforce_admins.enabled = false », « aucun fichier .editorconfig »). Un `NA` doit s'appuyer sur une condition écrite dans le référentiel.
 4. Si un signal est ambigu (contenu du README, outil de release externe possible, choix de l'assistant IA), poser la question à l'utilisateur plutôt que de trancher au hasard.
@@ -57,7 +67,6 @@ Créer le journal d'exécution (modèle dans `references/journal.md`), puis affi
 - **les KO seulement**, triés par criticité : ID, pratique, constat ;
 - la liste des NA, sur une ligne, avec leur justification abrégée ;
 - les **avertissements** prévus par le référentiel, qui n'entrent pas dans le score ;
-- les éventuelles causes structurelles, par exemple un dépôt privé en plan gratuit (voir le référentiel) ;
 - l'état du badge repocheck : absent, à jour, ou périmé (ce qu'il affiche et ce qu'il devrait afficher).
 
 ## 4. Proposer un plan
@@ -102,13 +111,14 @@ Si le dossier du journal se trouve dans un dépôt Git dont la branche par défa
 
 ## Création d'un dépôt
 
-1. Demander le nom, la description, la visibilité, la licence et le langage.
-2. `gh repo create owner/nom --<visibilité> --description "..." --license <spdx> --gitignore <Lang> --clone=false`
+1. Demander le nom, la description, la licence et le langage. Le dépôt est créé public : le skill ne crée pas de dépôt privé (voir l'étape 0).
+2. `gh repo create owner/nom --public --description "..." --license <spdx> --gitignore <Lang> --clone=false`
 3. Enchaîner un audit et un plan sur ce dépôt neuf. Le premier lot de fichiers peut être poussé directement sur la branche par défaut, puisqu'aucune protection n'existe encore : le proposer, puis appliquer la protection de branche en dernier.
 
 ## Ce que le skill ne fait jamais
 
 - Merger une PR, pousser directement sur la branche par défaut d'un dépôt existant, ou forcer un push.
 - Supprimer un tag, une branche, un fichier ou une release sans confirmation individuelle.
+- Lire, auditer ou journaliser un dépôt privé.
 - Changer la visibilité d'un dépôt, ou toucher aux secrets et aux réglages de facturation.
 - Modifier un journal d'exécution passé.

@@ -14,6 +14,16 @@ if [ -z "$REPO" ]; then
   }
 fi
 
+# Un dépôt non public n'est jamais collecté : sa collecte finirait dans un journal public.
+VISIBILITY=$(gh api "repos/$REPO" --jq .visibility 2>/dev/null) || {
+  echo "Dépôt inaccessible : $REPO." >&2
+  exit 1
+}
+if [ "$VISIBILITY" != "public" ]; then
+  echo "Dépôt $VISIBILITY : repocheck ne traite que les dépôts publics. Aucune collecte." >&2
+  exit 3
+fi
+
 # Appelle gh api ; en cas d'échec, affiche le code HTTP au lieu d'interrompre la collecte.
 api() {
   local out rc

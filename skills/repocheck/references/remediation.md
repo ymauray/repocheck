@@ -132,7 +132,7 @@ Encodage dans l'URL : espace → `%20`, `/` → `%2F`, et tout `-` du texte doub
 [![repocheck](https://img.shields.io/badge/repocheck%201.3.0-100%2F100-brightgreen)](https://github.com/ymauray/repocheck)
 ```
 
-**Repérage** : un badge existant est la ligne du README qui contient `img.shields.io/badge/repocheck`. La version et le score se lisent dans son URL ; il est à jour s'ils correspondent au référentiel courant et au score de l'audit.
+**Repérage** : un badge existant est une ligne du bloc de tête du README, avant le premier titre `##`, qui contient `img.shields.io/badge/repocheck`. Une telle ligne plus bas dans le README (un exemple de documentation, par exemple) n'est pas le badge. La version et le score se lisent dans son URL ; il est à jour s'ils correspondent au référentiel courant et au score de l'audit.
 
 **Mise en œuvre** (type PR, dernier commit de la PR, `chore(repocheck): badge — <score>/100 (référentiel <version>)`) :
 
