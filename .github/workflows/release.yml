@@ -1,0 +1,38 @@
+name: Release
+
+# Publie la version déclarée dans .claude-plugin/plugin.json : à chaque push
+# sur main, crée le tag vX.Y.Z et sa release s'ils n'existent pas encore.
+# Publier une version revient donc à incrémenter `version` dans plugin.json.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Publier la version de plugin.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          tag="v$version"
+          if ! printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version invalide dans plugin.json : $version"
+            exit 1
+          fi
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag est déjà publiée."
+            exit 0
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "repocheck $tag" --generate-notes
