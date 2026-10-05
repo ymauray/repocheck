@@ -1,0 +1,348 @@
+# Collecte repocheck — ymauray/repocheck
+Date : 2026-10-05T15:02:02Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":false,"allow_rebase_merge":false,"allow_squash_merge":true,"archived":false,"default_branch":"main","delete_branch_on_merge":true,"description":"Plugin Claude Code : audit de conformité des dépôts GitHub à un référentiel de bonnes pratiques, plan d'action et mise en œuvre tracée","fork":false,"full_name":"ymauray/repocheck","has_discussions":true,"has_issues":true,"has_pages":false,"has_wiki":true,"homepage":null,"license":"MIT","owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"enabled"},"secret_scanning":{"status":"enabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"enabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":["audit","bash","best-practices","claude-code","claude-code-plugin","devops","github","github-api"],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 64
+
+### Racine
+dir	.claude-plugin
+file	.editorconfig
+file	.gitattributes
+dir	.github
+file	.gitignore
+file	AGENTS.md
+file	CLAUDE.md
+file	CODE_OF_CONDUCT.md
+file	CONTRIBUTING.md
+file	LICENSE
+file	README.md
+file	SECURITY.md
+dir	docs
+dir	journal
+dir	skills
+
+### Fichiers de configuration, communautaires et manifestes
+.editorconfig
+.gitattributes
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+.github/SUPPORT.md
+.github/dependabot.yml
+.github/pull_request_template.md
+.github/workflows/lint.yml
+.github/workflows/release.yml
+.gitignore
+AGENTS.md
+CLAUDE.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+LICENSE
+README.md
+SECURITY.md
+skills/repocheck/templates/.editorconfig
+skills/repocheck/templates/.gitattributes
+skills/repocheck/templates/.github/SUPPORT.md
+skills/repocheck/templates/.github/pull_request_template.md
+skills/repocheck/templates/CLAUDE.md
+skills/repocheck/templates/CONTRIBUTING.md
+skills/repocheck/templates/README.md
+skills/repocheck/templates/SECURITY.md
+
+===== [repocheck] README =====
+
+~~~~markdown
+# repocheck
+
+[![Lint](https://github.com/ymauray/repocheck/actions/workflows/lint.yml/badge.svg)](https://github.com/ymauray/repocheck/actions/workflows/lint.yml)
+[![Release](https://img.shields.io/github/v/release/ymauray/repocheck)](https://github.com/ymauray/repocheck/releases)
+[![Licence MIT](https://img.shields.io/github/license/ymauray/repocheck)](LICENSE)
+
+Plugin Claude Code qui audite la conformité de dépôts GitHub à un référentiel de bonnes pratiques, calcule un score, propose un plan d'action, applique les actions validées et trace tout dans un journal.
+
+## Contenu
+
+```
+.claude-plugin/          manifeste du plugin et marketplace locale
+skills/repocheck/
+  SKILL.md               déroulé du skill
+  references/
+    BONNES-PRATIQUES.md  le référentiel (36 pratiques, versionné)
+    remediation.md       comment corriger chaque pratique
+    journal.md           format du journal de traçabilité
+  scripts/
+    collect.sh           collecte des signaux via gh api (lecture seule)
+    score.sh             calcul du score, poids lus dans le référentiel
+  templates/             modèles de fichiers communautaires
+journal/                 journaux d'audit (INDEX.md, RETOURS.md, un dossier par dépôt)
+docs/archives/           référentiel d'origine, avant nettoyage
+```
+
+## Prérequis
+
+- Claude Code
+- [GitHub CLI](https://cli.github.com/) authentifié (`gh auth status`) avec des droits d'administration sur les dépôts à mettre en conformité. L'audit seul se contente d'un accès en lecture, mais certains réglages (protection de branche, sécurité) ne sont lisibles qu'avec les droits d'administration.
+- Bash (Git Bash sous Windows). Aucun `jq` n'est nécessaire : le filtrage passe par `gh --jq`.
+
+## Installation
+
+Dans Claude Code :
+
+```
+/plugin marketplace add ymauray/repocheck
+/plugin install repocheck@repocheck
+```
+
+Puis indiquer où écrire le journal, dans le bloc `env` de `~/.claude/settings.json` (sans cette variable, le skill demande l'emplacement à chaque exécution) :
+
+```json
+{
+  "env": {
+    "REPOCHECK_JOURNAL": "/chemin/vers/mon/journal"
+  }
+}
+```
+
+`/plugin marketplace update repocheck` récupère la dernière version.
+
+### Développer le plugin
+
+Pour travailler sur le skill ou le référentiel, déclarer plutôt la marketplace depuis un clone local : les modifications sont prises en compte après `/plugin marketplace update repocheck`, sans passer par GitHub.
+
+```sh
+git clone https://github.com/ymauray/repocheck.git
+```
+
+```
+/plugin marketplace add /chemin/vers/repocheck
+/plugin install repocheck@repocheck
+```
+
+## Utilisation
+
+Il suffit de demander, en langage naturel :
+
+| Demande | Effet |
+|---|---|
+| « audite ymauray/paige » | Audit et score, puis plan proposé. Rien n'est modifié. |
+| « mets ymauray/paige en conformité » | Audit, plan, validation, application, ré-audit et journal. |
+| « audite tous mes dépôts » | Audit en lot et tableau récapitulatif trié par score. |
+| « crée un dépôt conforme ymauray/nouveau » | Création, puis mise en conformité. |
+| « où en est ymauray/paige ? » | Dernier journal et historique des scores. |
+
+Garanties :
+
+- aucune modification sans validation explicite ;
+- les fichiers passent toujours par une PR, que le skill ne merge jamais ;
+- chaque réglage modifié est consigné avec son état avant, son état après et sa commande de retour arrière ;
+- les actions irréversibles (suppression de tags) demandent une confirmation une par une.
+
+Les scripts sont aussi utilisables seuls :
+
+```sh
+bash skills/repocheck/scripts/collect.sh owner/repo > collecte.txt
+bash skills/repocheck/scripts/score.sh statuts.txt   # une ligne « ID OK|KO|NA » par pratique
+```
+
+## Intégration continue et releases
+
+Tout passe par GitHub Actions ; aucun outil externe n'intervient.
+
+- **Lint** (`.github/workflows/lint.yml`), sur chaque PR et chaque push sur `main` : `bash -n` et `shellcheck` sur les scripts, auto-test de `score.sh` (toutes les pratiques du référentiel notées OK doivent donner 100/100, ce qui vérifie que chaque ligne du tableau est lisible), validité JSON des manifestes. C'est le check requis pour merger sur `main`.
+- **Release** (`.github/workflows/release.yml`), sur chaque push sur `main` : lit `version` dans `.claude-plugin/plugin.json` et, si le tag `vX.Y.Z` n'existe pas encore, crée le tag et la release GitHub (notes générées). Pour publier une version, il suffit donc d'incrémenter `version` dans la PR.
+- **Dependabot** tient à jour les actions utilisées par les workflows.
+
+`main` est protégée : les PR sont mergées en squash après passage du check `Lint`, administrateur compris.
+
+## Faire évoluer le référentiel
+
+Le référentiel est versionné (en tête de `BONNES-PRATIQUES.md`), et chaque journal indique la version utilisée.
+
+1. Les remarques faites pendant les audits sont consignées dans `journal/RETOURS.md`.
+2. Une règle modifiée ou ajoutée incrémente la version mineure ; une simple précision, la version de correctif.
+3. Ajouter une pratique : une ligne dans le tableau de sa catégorie (ID, pratique, criticité en emoji, évaluation, justification) et une entrée dans `remediation.md`. `score.sh` la prend en compte automatiquement.
+
+## Score
+
+Les poids sont : 🔴 4 · 🟠 2 · 🟡 1 · ⚪ 0,5. Le score vaut poids OK ÷ (poids OK + poids KO) × 100 ; les `NA` sont exclus. Une dérogation acceptée reste `KO` : elle n'améliore pas le score, mais l'action n'est plus proposée.
+
+### Badge
+
+La mise en conformité propose d'ajouter au README du dépôt audité un badge statique qui affiche la version du référentiel et le score, et qui renvoie vers ce dépôt :
+
+[![repocheck](https://img.shields.io/badge/repocheck%201.3.0-100%2F100-brightgreen)](https://github.com/ymauray/repocheck)
+
+Le badge part dans la PR de mise en conformité, avec le score attendu une fois toutes les actions validées appliquées. Chaque audit vérifie qu'il est à jour et propose de le corriger sinon. C'est une fonctionnalité du skill, pas une pratique : il n'entre pas dans le score. Le format et les couleurs sont décrits dans `remediation.md`.
+~~~~
+
+===== [repocheck] Workflows =====
+
+### .github/workflows/lint.yml
+```yaml
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Syntaxe bash
+        run: for f in skills/repocheck/scripts/*.sh; do bash -n "$f"; done
+
+      - name: ShellCheck
+        run: shellcheck skills/repocheck/scripts/*.sh
+
+      # Toutes les pratiques du référentiel notées OK doivent donner 100/100 :
+      # vérifie que score.sh lit chaque ligne (ID, criticité) sans doublon ni oubli.
+      - name: Auto-test du score
+        run: |
+          grep -oE '^\| [A-Z]+-[0-9]+ \|' skills/repocheck/references/BONNES-PRATIQUES.md \
+            | tr -d '| ' | sed 's/$/ OK/' \
+            | bash skills/repocheck/scripts/score.sh | tee score.txt
+          grep -qx 'Score : 100/100' score.txt
+
+      - name: Manifestes JSON
+        run: for f in .claude-plugin/*.json; do python3 -m json.tool "$f" > /dev/null; done
+```
+### .github/workflows/release.yml
+```yaml
+name: Release
+
+# Publie la version déclarée dans .claude-plugin/plugin.json : à chaque push
+# sur main, crée le tag vX.Y.Z et sa release s'ils n'existent pas encore.
+# Publier une version revient donc à incrémenter `version` dans plugin.json.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Publier la version de plugin.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          tag="v$version"
+          if ! printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version invalide dans plugin.json : $version"
+            exit 1
+          fi
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag est déjà publiée."
+            exit 0
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "repocheck $tag" --generate-notes
+```
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+# CLAUDE.md
+
+Les consignes de ce projet sont dans `AGENTS.md`, communes à tous les agents de code.
+
+@AGENTS.md
+
+AGENTS.md : présent à la racine
+
+===== [repocheck] .gitattributes (META-10) =====
+
+* text=auto eol=lf
+
+Scripts Windows (.bat/.cmd) : 0
+
+===== [repocheck] dependabot.yml =====
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+===== [repocheck] Protection de branche classique (main) =====
+
+{"url":"https://api.github.com/repos/ymauray/repocheck/branches/main/protection","required_status_checks":{"url":"https://api.github.com/repos/ymauray/repocheck/branches/main/protection/required_status_checks","strict":false,"contexts":["Lint"],"contexts_url":"https://api.github.com/repos/ymauray/repocheck/branches/main/protection/required_status_checks/contexts","checks":[{"context":"Lint","app_id":15368}]},"required_signatures":{"url":"https://api.github.com/repos/ymauray/repocheck/branches/main/protection/required_signatures","enabled":false},"enforce_admins":{"url":"https://api.github.com/repos/ymauray/repocheck/branches/main/protection/enforce_admins","enabled":true},"required_linear_history":{"enabled":false},"allow_force_pushes":{"enabled":false},"allow_deletions":{"enabled":false},"block_creations":{"enabled":false},"required_conversation_resolution":{"enabled":false},"lock_branch":{"enabled":false},"allow_fork_syncing":{"enabled":false}}
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":true,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":true}
+
+===== [repocheck] Tags (100 premiers) =====
+
+v0.6.0	sur main
+v0.5.0	sur main
+v0.4.0	sur main
+
+===== [repocheck] Releases (10 dernières) =====
+
+v0.6.0	repocheck v0.6.0	2026-10-05T14:59:55Z	prerelease=false
+v0.5.0	repocheck v0.5.0	2026-10-05T10:59:22Z	prerelease=false
+v0.4.0	repocheck v0.4.0	2026-10-05T10:55:15Z	prerelease=false
+
+===== [repocheck] GitHub Pages =====
+
+ÉCHEC HTTP 404 : {"message":"Not Found","documentation_url":"https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site","status":"404"}gh: Not Found (HTTP 404)
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+Lint	success	app=github-actions
+Release	success	app=github-actions
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+
