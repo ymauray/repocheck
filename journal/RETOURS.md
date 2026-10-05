@@ -31,3 +31,15 @@
 - **Constat** : en publiant repocheck, le `core.autocrlf` de Git for Windows aurait extrait `collect.sh` et `score.sh` en CRLF, ce qui les rend inutilisables sous bash. Aucun des dépôts audités (prizm, paige, timetracker.ios) n'a de `.gitattributes`.
 - **Proposition** : nouvelle pratique META-10 🟡 : `.gitattributes` qui normalise les fins de ligne.
 - **Décision** : validée par l'utilisateur le 2026-10-05, ajoutée au référentiel v1.3.0 (36 pratiques).
+
+## 2026-10-05 — mise en conformité de repocheck
+
+### Journal et protection de branche
+- **Constat** : le journal est versionné dans repocheck. Une fois `main` protégée (`enforce_admins` et check `Lint` requis), il ne peut plus y être commité directement.
+- **Options** : une PR par exécution, un journal hors du dépôt, ou une dérogation sur la protection.
+- **Décision** (utilisateur) : une PR par exécution. Ajout de l'étape 8 « Livrer le journal » dans `SKILL.md` et de la section « Livraison du journal » dans `references/journal.md` ; plugin en 0.5.0.
+
+### Collecte : les modèles comptés comme fichiers communautaires
+- **Constat** : `collect.sh` liste `skills/repocheck/templates/SECURITY.md`, etc. parmi les fichiers communautaires. L'évaluation s'en tient aux emplacements canoniques, mais le bruit peut induire en erreur.
+- **Proposition** : limiter la recherche des fichiers communautaires à la racine, `.github/` et `docs/`.
+- **Décision** : en attente
