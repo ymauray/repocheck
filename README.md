@@ -31,21 +31,34 @@ docs/archives/           référentiel d'origine, avant nettoyage
 Dans Claude Code :
 
 ```
-/plugin marketplace add C:/Users/yannick.mauray/perso/repocheck
+/plugin marketplace add ymauray/repocheck
 /plugin install repocheck@repocheck
 ```
 
-Puis indiquer où écrire le journal, dans `~/.claude/settings.json` :
+Puis indiquer où écrire le journal, dans le bloc `env` de `~/.claude/settings.json` (sans cette variable, le skill demande l'emplacement à chaque exécution) :
 
 ```json
 {
   "env": {
-    "REPOCHECK_JOURNAL": "C:/Users/yannick.mauray/perso/repocheck/journal"
+    "REPOCHECK_JOURNAL": "/chemin/vers/mon/journal"
   }
 }
 ```
 
-Après une modification du skill ou du référentiel, `/plugin marketplace update repocheck` recharge la version locale.
+`/plugin marketplace update repocheck` récupère la dernière version.
+
+### Développer le plugin
+
+Pour travailler sur le skill ou le référentiel, déclarer plutôt la marketplace depuis un clone local : les modifications sont prises en compte après `/plugin marketplace update repocheck`, sans passer par GitHub.
+
+```sh
+git clone https://github.com/ymauray/repocheck.git
+```
+
+```
+/plugin marketplace add /chemin/vers/repocheck
+/plugin install repocheck@repocheck
+```
 
 ## Utilisation
 
