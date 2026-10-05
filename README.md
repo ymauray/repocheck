@@ -78,6 +78,7 @@ Il suffit de demander, en langage naturel :
 
 Garanties :
 
+- les dépôts privés ne sont ni lus, ni audités, ni journalisés : le journal est public ;
 - aucune modification sans validation explicite ;
 - les fichiers passent toujours par une PR, que le skill ne merge jamais ;
 - chaque réglage modifié est consigné avec son état avant, son état après et sa commande de retour arrière ;

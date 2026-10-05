@@ -43,3 +43,10 @@
 - **Constat** : `collect.sh` liste `skills/repocheck/templates/SECURITY.md`, etc. parmi les fichiers communautaires. L'évaluation s'en tient aux emplacements canoniques, mais le bruit peut induire en erreur.
 - **Proposition** : limiter la recherche des fichiers communautaires à la racine, `.github/` et `docs/`.
 - **Décision** : en attente
+
+## 2026-10-05 — audit interrompu de ymauray/encrine
+
+### Dépôts privés : ne rien faire
+- **Constat** : l'audit de `ymauray/encrine`, dépôt privé, a écrit sa collecte (README, workflows, tags) dans `journal/`, versionné dans le dépôt public repocheck et livré par PR. Interrompu à temps, la collecte supprimée avant tout commit.
+- **Proposition** : le skill ne traite aucun dépôt privé.
+- **Décision** (2026-10-05, utilisateur) : appliquée au plugin 0.7.0. Étape 0 du skill : vérifier la visibilité et s'arrêter sans rien écrire si le dépôt n'est pas public ; `collect.sh` refuse un dépôt non public ; l'audit en lot ne liste que les dépôts publics ; la création ne crée que des dépôts publics. La section « Dépôts privés » du référentiel devient sans objet : à retirer lors de sa prochaine révision.
