@@ -21,7 +21,7 @@ skills/repocheck/
     collect.sh           collecte des signaux via gh api (lecture seule)
     score.sh             calcul du score, poids lus dans le référentiel
   templates/             modèles de fichiers communautaires
-journal/                 journaux d'audit (INDEX.md, RETOURS.md, un dossier par dépôt)
+docs/RETOURS.md          décisions sur le référentiel et le skill
 docs/archives/           référentiel d'origine, avant nettoyage
 ```
 
@@ -40,12 +40,12 @@ Dans Claude Code :
 /plugin install repocheck@repocheck
 ```
 
-Puis indiquer où écrire le journal, dans le bloc `env` de `~/.claude/settings.json` (sans cette variable, le skill demande l'emplacement à chaque exécution) :
+Puis indiquer où écrire le journal, un dossier local hors de tout dépôt, dans le bloc `env` de `~/.claude/settings.json` (sans cette variable, le skill demande l'emplacement à chaque exécution) :
 
 ```json
 {
   "env": {
-    "REPOCHECK_JOURNAL": "/chemin/vers/mon/journal"
+    "REPOCHECK_JOURNAL": "/Users/moi/.local/share/repocheck/journal"
   }
 }
 ```
@@ -106,7 +106,7 @@ Tout passe par GitHub Actions ; aucun outil externe n'intervient.
 
 Le référentiel est versionné (en tête de `BONNES-PRATIQUES.md`), et chaque journal indique la version utilisée.
 
-1. Les remarques faites pendant les audits sont consignées dans `journal/RETOURS.md`.
+1. Les décisions sont consignées dans `docs/RETOURS.md`.
 2. Une règle modifiée ou ajoutée incrémente la version mineure ; une simple précision, la version de correctif.
 3. Ajouter une pratique : une ligne dans le tableau de sa catégorie (ID, pratique, criticité en emoji, évaluation, justification) et une entrée dans `remediation.md`. `score.sh` la prend en compte automatiquement.
 

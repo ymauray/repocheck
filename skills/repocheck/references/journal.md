@@ -4,28 +4,16 @@ Le journal permet de savoir, pour chaque dépôt et à tout moment : ce qui a é
 
 ## Emplacement
 
-Le dossier est donné par la variable d'environnement `REPOCHECK_JOURNAL`. Si elle n'est pas définie, demander à l'utilisateur où écrire, en proposant le dossier `journal/` du dépôt repocheck, puis lui suggérer de définir la variable (dans le bloc `env` de `~/.claude/settings.json`).
+Le dossier est donné par la variable d'environnement `REPOCHECK_JOURNAL`. Si elle n'est pas définie, demander à l'utilisateur où écrire, puis lui suggérer de définir la variable (dans le bloc `env` de `~/.claude/settings.json`).
 
 ```
 $REPOCHECK_JOURNAL/
 ├── INDEX.md                         # une ligne par exécution, tous dépôts confondus
-├── RETOURS.md                       # retours de l'utilisateur sur le référentiel et le skill
 └── <owner>/<repo>/
     ├── DEROGATIONS.md               # écarts acceptés durablement pour ce dépôt
     ├── <AAAA-MM-JJ-HHMM>.md          # journal d'une exécution
     └── <AAAA-MM-JJ-HHMM>.collecte.txt  # sortie brute de collect.sh (preuve)
 ```
-
-### Livraison du journal
-
-Quand `$REPOCHECK_JOURNAL` est dans un dépôt Git dont la branche par défaut est protégée (c'est le cas du dépôt repocheck), le journal ne peut pas y être commité directement. À la fin de chaque exécution :
-
-1. Depuis la racine de ce dépôt, à jour de sa branche par défaut, créer la branche `journal/<AAAA-MM-JJ-HHMM>-<repo>`.
-2. N'ajouter **que les fichiers de l'exécution** : son journal, ses collectes, et les modifications d'`INDEX.md`, de `RETOURS.md` et de `DEROGATIONS.md`. Un seul commit : `journal: <owner/repo> (<mode>, <AAAA-MM-JJ HH:MM>)`.
-3. Pousser, ouvrir la PR « Journal : <owner/repo> (<AAAA-MM-JJ>) », puis revenir sur la branche par défaut.
-4. Ne pas merger la PR : c'est à l'utilisateur de le faire. Donner son URL dans le résumé final.
-
-Si le dossier n'est pas versionné, ou si sa branche par défaut n'est pas protégée, cette étape ne s'applique pas.
 
 Règles :
 
@@ -101,7 +89,7 @@ En attente du merge de la PR #12 : META-07, GOV-05 (ces pratiques passeront à O
 
 ## Retours
 
-- (remarques de l'utilisateur sur des règles ou des propositions, reportées aussi dans RETOURS.md)
+- (remarques de l'utilisateur sur des règles ou des propositions)
 ```
 
 ## INDEX.md
@@ -125,14 +113,3 @@ Un écart que l'utilisateur refuse de corriger **durablement** est enregistré i
 ```
 
 Effet : la pratique reste `KO` dans le score, mais elle est signalée « (dérogation) » et n'est plus proposée dans le plan, sauf si sa date de révision est passée.
-
-## RETOURS.md
-
-Toute remarque de l'utilisateur qui remet en cause une règle du référentiel ou un comportement du skill :
-
-```markdown
-## 2026-10-05 — owner/repo
-- **Constat** : CI-06 compte KO des tags `jalon-N` qui sont des jalons de développement, pas des versions.
-- **Proposition** : ...
-- **Décision** : en attente | appliquée au référentiel v1.1.0 | rejetée
-```

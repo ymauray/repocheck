@@ -13,7 +13,7 @@ Pour une nouvelle pratique, une règle modifiée ou un changement du déroulé d
 - **Référentiel** (`skills/repocheck/references/BONNES-PRATIQUES.md`) :
   - toute modification incrémente sa version : `x.y.Z` pour une précision, `x.Y.0` pour une règle ajoutée ou modifiée ;
   - toute pratique ajoutée a son entrée dans `remediation.md` ;
-  - la décision est consignée dans `journal/RETOURS.md`.
+  - la décision est consignée dans `docs/RETOURS.md`.
 - **Plugin** : incrémenter `version` dans `.claude-plugin/plugin.json`. Chaque nouvelle version est publiée automatiquement au merge (voir le README).
 - **Journal** : une entrée d'exécution passée ne se modifie jamais.
 

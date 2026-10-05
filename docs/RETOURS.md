@@ -57,3 +57,9 @@
 - **Constat** : l'audit de repocheck (2026-10-05 17:01) a déclaré le badge « à jour » en s'appuyant sur l'exemple de la section « Badge » du README. Le README n'avait aucun badge repocheck en tête.
 - **Proposition** : ne repérer le badge que dans le bloc de tête du README, avant le premier titre `##`.
 - **Décision** (2026-10-05, utilisateur) : appliquée à `remediation.md` (plugin 0.7.0), et badge `repocheck 1.3.0 | 100/100` ajouté en tête du README de repocheck.
+
+## 2026-10-05 — journal local
+
+### Le journal quitte le dépôt repocheck
+- **Constat** : versionner le journal dans repocheck impose une PR par exécution et de lancer le skill depuis ce dossier.
+- **Décision** (2026-10-05, utilisateur) : le journal reste en local, dans le dossier donné par `REPOCHECK_JOURNAL` (demandé à l'utilisateur s'il n'est pas défini). Suppression de l'étape 8 « Livrer le journal ». `RETOURS.md` passe dans `docs/` ; le skill ne l'alimente plus et ne propose plus de lui-même de modifier le référentiel : l'utilisateur le demande explicitement. Plugin 0.8.0.
