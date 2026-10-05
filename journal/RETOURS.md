@@ -50,3 +50,10 @@
 - **Constat** : l'audit de `ymauray/encrine`, dépôt privé, a écrit sa collecte (README, workflows, tags) dans `journal/`, versionné dans le dépôt public repocheck et livré par PR. Interrompu à temps, la collecte supprimée avant tout commit.
 - **Proposition** : le skill ne traite aucun dépôt privé.
 - **Décision** (2026-10-05, utilisateur) : appliquée au plugin 0.7.0. Étape 0 du skill : vérifier la visibilité et s'arrêter sans rien écrire si le dépôt n'est pas public ; `collect.sh` refuse un dépôt non public ; l'audit en lot ne liste que les dépôts publics ; la création ne crée que des dépôts publics. La section « Dépôts privés » du référentiel devient sans objet : à retirer lors de sa prochaine révision.
+
+## 2026-10-05 — badge de ymauray/repocheck
+
+### Badge : un exemple pris pour le badge
+- **Constat** : l'audit de repocheck (2026-10-05 17:01) a déclaré le badge « à jour » en s'appuyant sur l'exemple de la section « Badge » du README. Le README n'avait aucun badge repocheck en tête.
+- **Proposition** : ne repérer le badge que dans le bloc de tête du README, avant le premier titre `##`.
+- **Décision** (2026-10-05, utilisateur) : appliquée à `remediation.md` (plugin 0.7.0), et badge `repocheck 1.3.0 | 100/100` ajouté en tête du README de repocheck.

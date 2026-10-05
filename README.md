@@ -3,6 +3,7 @@
 [![Lint](https://github.com/ymauray/repocheck/actions/workflows/lint.yml/badge.svg)](https://github.com/ymauray/repocheck/actions/workflows/lint.yml)
 [![Release](https://img.shields.io/github/v/release/ymauray/repocheck)](https://github.com/ymauray/repocheck/releases)
 [![Licence MIT](https://img.shields.io/github/license/ymauray/repocheck)](LICENSE)
+[![repocheck](https://img.shields.io/badge/repocheck%201.3.0-100%2F100-brightgreen)](https://github.com/ymauray/repocheck)
 
 Plugin Claude Code qui audite la conformité de dépôts GitHub à un référentiel de bonnes pratiques, calcule un score, propose un plan d'action, applique les actions validées et trace tout dans un journal.
 
