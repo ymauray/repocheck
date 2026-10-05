@@ -90,6 +90,16 @@ bash skills/repocheck/scripts/collect.sh owner/repo > collecte.txt
 bash skills/repocheck/scripts/score.sh statuts.txt   # une ligne « ID OK|KO|NA » par pratique
 ```
 
+## Intégration continue et releases
+
+Tout passe par GitHub Actions ; aucun outil externe n'intervient.
+
+- **Lint** (`.github/workflows/lint.yml`), sur chaque PR et chaque push sur `main` : `bash -n` et `shellcheck` sur les scripts, auto-test de `score.sh` (toutes les pratiques du référentiel notées OK doivent donner 100/100, ce qui vérifie que chaque ligne du tableau est lisible), validité JSON des manifestes. C'est le check requis pour merger sur `main`.
+- **Release** (`.github/workflows/release.yml`), sur chaque push sur `main` : lit `version` dans `.claude-plugin/plugin.json` et, si le tag `vX.Y.Z` n'existe pas encore, crée le tag et la release GitHub (notes générées). Pour publier une version, il suffit donc d'incrémenter `version` dans la PR.
+- **Dependabot** tient à jour les actions utilisées par les workflows.
+
+`main` est protégée : les PR sont mergées en squash après passage du check `Lint`, administrateur compris.
+
 ## Faire évoluer le référentiel
 
 Le référentiel est versionné (en tête de `BONNES-PRATIQUES.md`), et chaque journal indique la version utilisée.
