@@ -27,6 +27,7 @@ Notations : `$R` = `owner/repo`, `$B` = branche par défaut.
 | META-07 | PR | `.editorconfig` (modèle dans `templates/`), à aligner sur le style existant du code : indentation, fins de ligne. |
 | META-08 | PR | Badges en tête du README : statut du workflow CI (`https://github.com/$R/actions/workflows/<fichier>/badge.svg`), licence, dernière release. |
 | META-09 | PR | Section « Intégration continue et releases » dans le README : ce que fait chaque workflow, quel outil externe produit les releases, et où passe la frontière entre les deux. **Demander à l'utilisateur** quels outils externes il utilise, car ils sont invisibles via l'API. |
+| META-10 | PR | `.gitattributes` (modèle) : `* text=auto eol=lf`, plus `*.bat text eol=crlf` et `*.cmd text eol=crlf` si le dépôt en contient. Compléter un fichier existant sans retirer ses règles (`binary`, `linguist-*`, LFS...). Dans le **même commit**, lancer `git add --renormalize .` pour que les fichiers déjà versionnés en CRLF soient convertis ; signaler dans la PR le nombre de fichiers touchés par la renormalisation. |
 
 ## Gouvernance
 

@@ -1,6 +1,6 @@
 # Référentiel de bonnes pratiques — dépôts GitHub
 
-Version : 1.2.0
+Version : 1.3.0
 
 Chaque pratique reçoit un statut par dépôt :
 
@@ -36,6 +36,7 @@ Les conditions `NA` reposent sur ces qualifications, à établir au début de ch
 | META-07 | `.editorconfig` présent | 🟡 | | Garantit un style cohérent d'un éditeur et d'un contributeur à l'autre. |
 | META-08 | Badges de statut dans le README (build, licence, version...) | ⚪ | `NA` en l'absence de README, puisque META-04 couvre déjà ce manque. | Repère visuel rapide sur l'état du projet. |
 | META-09 | Le README documente la chaîne CI/CD réelle, outils externes compris | 🟡 | Il doit aussi indiquer la frontière entre ce que fait la CI du dépôt et ce que fait l'outil externe. | Une release assurée par un outil externe (Xcode Cloud, Codemagic, Bitrise...) ne laisse aucune trace vérifiable via `gh api`. Sans mention dans le README, un lecteur conclut à tort que le projet n'a ni CI ni release. |
+| META-10 | `.gitattributes` qui normalise les fins de ligne | 🟡 | `OK` si une règle couvre tous les fichiers texte (`* text=auto`, avec ou sans `eol=lf`). `KO` si le fichier est absent ou ne normalise pas les fins de ligne. Les scripts Windows (`.bat`, `.cmd`), s'il y en a, doivent garder `eol=crlf`. | Les fins de ligne ne dépendent plus de la configuration Git de chaque contributeur (par exemple `core.autocrlf` de Git for Windows) : pas de script shell cassé par du CRLF (`bad interpreter: /bin/bash^M`), pas de diff pollué. |
 
 ## Fichiers communautaires et gouvernance
 

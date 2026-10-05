@@ -24,3 +24,10 @@
 - SEC-03 doit couvrir `github-actions` dès qu'il y a des workflows (repris de l'avertissement de CI-04).
 - Poids du score : 4 / 2 / 1 / 0,5 ; une dérogation reste `KO` dans le score.
 - **Décision** : validées par l'utilisateur le 2026-10-05.
+
+## 2026-10-05 — mise sous Git du plugin
+
+### META-10 : `.gitattributes`
+- **Constat** : en publiant repocheck, le `core.autocrlf` de Git for Windows aurait extrait `collect.sh` et `score.sh` en CRLF, ce qui les rend inutilisables sous bash. Aucun des dépôts audités (prizm, paige, timetracker.ios) n'a de `.gitattributes`.
+- **Proposition** : nouvelle pratique META-10 🟡 : `.gitattributes` qui normalise les fins de ligne.
+- **Décision** : validée par l'utilisateur le 2026-10-05, ajoutée au référentiel v1.3.0 (36 pratiques).

@@ -9,6 +9,7 @@ Les blocs entre `<!-- repocheck: ... -->` sont des consignes de rédaction : il 
 | Modèle | Pratique | Emplacement cible |
 |---|---|---|
 | `.editorconfig` | META-07 | racine |
+| `.gitattributes` | META-10 | racine |
 | `CONTRIBUTING.md` | GOV-01 | racine |
 | `SECURITY.md` | GOV-03 | racine |
 | `.github/ISSUE_TEMPLATE/*` | GOV-04 | `.github/ISSUE_TEMPLATE/` |

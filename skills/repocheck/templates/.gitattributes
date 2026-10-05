@@ -1,0 +1,6 @@
+# Fins de ligne normalisées, indépendamment de la configuration Git locale.
+* text=auto eol=lf
+
+# repocheck : ne garder ces lignes que si le dépôt contient des scripts Windows.
+*.bat text eol=crlf
+*.cmd text eol=crlf

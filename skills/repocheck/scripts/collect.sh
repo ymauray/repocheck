@@ -69,7 +69,7 @@ gh api "repos/$REPO/contents?ref=$BRANCH" --jq '.[] | "\(.type)\t\(.name)"' 2>/d
 echo
 echo "### Fichiers de configuration, communautaires et manifestes"
 printf '%s\n' "$TREE" | grep -v -E '(^|/)(node_modules|vendor|Pods|\.venv|dist|build)/' | grep -E -i \
-  '(^|/)(readme[^/]*|license[^/]*|licence[^/]*|copying[^/]*|contributing[^/]*|code_of_conduct[^/]*|security[^/]*|support[^/]*|codeowners|\.gitignore|\.editorconfig|claude\.md|agents\.md|gemini\.md|copilot-instructions\.md|\.cursorrules|dependabot\.ya?ml|pull_request_template[^/]*|package\.json|requirements[^/]*\.txt|pyproject\.toml|pipfile|setup\.py|go\.mod|cargo\.toml|gemfile|composer\.json|pom\.xml|build\.gradle(\.kts)?|[^/]*\.csproj|[^/]*\.sln|packages\.config|package\.swift|podfile|pubspec\.yaml|dockerfile|docker-compose[^/]*|mix\.exs|[^/]*\.tf|\.gitmodules|cname|_config\.yml|mkdocs\.yml|codemagic\.yaml|bitrise\.yml|\.releaserc[^/]*|release-please[^/]*|\.goreleaser[^/]*)$|^\.github/|^\.ci_scripts/|^ci_scripts/|^Casks/|^Formula/|^bucket/'
+  '(^|/)(readme[^/]*|license[^/]*|licence[^/]*|copying[^/]*|contributing[^/]*|code_of_conduct[^/]*|security[^/]*|support[^/]*|codeowners|\.gitignore|\.gitattributes|\.editorconfig|claude\.md|agents\.md|gemini\.md|copilot-instructions\.md|\.cursorrules|dependabot\.ya?ml|pull_request_template[^/]*|package\.json|requirements[^/]*\.txt|pyproject\.toml|pipfile|setup\.py|go\.mod|cargo\.toml|gemfile|composer\.json|pom\.xml|build\.gradle(\.kts)?|[^/]*\.csproj|[^/]*\.sln|packages\.config|package\.swift|podfile|pubspec\.yaml|dockerfile|docker-compose[^/]*|mix\.exs|[^/]*\.tf|\.gitmodules|cname|_config\.yml|mkdocs\.yml|codemagic\.yaml|bitrise\.yml|\.releaserc[^/]*|release-please[^/]*|\.goreleaser[^/]*)$|^\.github/|^\.ci_scripts/|^ci_scripts/|^Casks/|^Formula/|^bucket/'
 
 section "README"
 echo "~~~~markdown"; api "repos/$REPO/readme" -H "Accept: application/vnd.github.raw" | head -n 400; echo "~~~~"
@@ -88,11 +88,14 @@ else
 fi
 
 section "CLAUDE.md (TOOL-01 : doit importer @AGENTS.md)"
-if printf '%s
-' "$TREE" | grep -qx 'CLAUDE.md'; then raw CLAUDE.md; else echo "(absent)"; fi
+if printf '%s\n' "$TREE" | grep -qxF 'CLAUDE.md'; then raw CLAUDE.md; else echo "(absent)"; fi
 echo
-if printf '%s
-' "$TREE" | grep -qx 'AGENTS.md'; then echo "AGENTS.md : présent à la racine"; else echo "AGENTS.md : absent de la racine"; fi
+if printf '%s\n' "$TREE" | grep -qxF 'AGENTS.md'; then echo "AGENTS.md : présent à la racine"; else echo "AGENTS.md : absent de la racine"; fi
+
+section ".gitattributes (META-10)"
+if printf '%s\n' "$TREE" | grep -qxF '.gitattributes'; then raw .gitattributes; else echo "(absent)"; fi
+echo
+echo "Scripts Windows (.bat/.cmd) : $(printf '%s\n' "$TREE" | grep -c -i -E '\.(bat|cmd)$')"
 
 section "dependabot.yml"
 DEP=$(printf '%s\n' "$TREE" | grep -E '^\.github/dependabot\.ya?ml$' | head -1)

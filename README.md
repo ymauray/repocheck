@@ -9,7 +9,7 @@ Plugin Claude Code qui audite la conformité de dépôts GitHub à un référent
 skills/repocheck/
   SKILL.md               déroulé du skill
   references/
-    BONNES-PRATIQUES.md  le référentiel (35 pratiques, versionné)
+    BONNES-PRATIQUES.md  le référentiel (36 pratiques, versionné)
     remediation.md       comment corriger chaque pratique
     journal.md           format du journal de traçabilité
   scripts/
