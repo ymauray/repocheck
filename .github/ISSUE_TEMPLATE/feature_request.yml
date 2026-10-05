@@ -1,0 +1,22 @@
+name: Demande d'évolution
+description: Proposer une pratique, une règle modifiée ou une amélioration du skill
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Besoin
+      description: Quel problème ou quelle limitation cette proposition résout-elle ? Pour une règle, citez son ID (ex. CI-06).
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Pour une pratique, donnez la criticité, la condition d'évaluation (OK / KO / NA) et la justification.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées

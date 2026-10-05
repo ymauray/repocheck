@@ -1,0 +1,47 @@
+name: Rapport de bug
+description: Signaler un dysfonctionnement du skill, des scripts ou une évaluation erronée
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Merci de vérifier qu'un rapport similaire n'est pas déjà ouvert. Une règle du référentiel que vous trouvez discutable relève plutôt d'une demande d'évolution.
+  - type: input
+    id: version
+    attributes:
+      label: Version du plugin
+      description: Champ `version` de `.claude-plugin/plugin.json`, ou release utilisée.
+    validations:
+      required: true
+  - type: input
+    id: environnement
+    attributes:
+      label: Environnement
+      description: Système d'exploitation, shell (Git Bash, bash, zsh...), versions de Claude Code et de gh.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du problème
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. Demander « audite owner/repo »
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Informations complémentaires
+      description: Extrait du journal ou de la collecte (masquez tout token).

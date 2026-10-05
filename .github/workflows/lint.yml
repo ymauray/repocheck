@@ -1,0 +1,37 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Syntaxe bash
+        run: for f in skills/repocheck/scripts/*.sh; do bash -n "$f"; done
+
+      - name: ShellCheck
+        run: shellcheck skills/repocheck/scripts/*.sh
+
+      # Toutes les pratiques du référentiel notées OK doivent donner 100/100 :
+      # vérifie que score.sh lit chaque ligne (ID, criticité) sans doublon ni oubli.
+      - name: Auto-test du score
+        run: |
+          grep -oE '^\| [A-Z]+-[0-9]+ \|' skills/repocheck/references/BONNES-PRATIQUES.md \
+            | tr -d '| ' | sed 's/$/ OK/' \
+            | bash skills/repocheck/scripts/score.sh | tee score.txt
+          grep -qx 'Score : 100/100' score.txt
+
+      - name: Manifestes JSON
+        run: for f in .claude-plugin/*.json; do python3 -m json.tool "$f" > /dev/null; done

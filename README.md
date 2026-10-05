@@ -1,5 +1,9 @@
 # repocheck
 
+[![Lint](https://github.com/ymauray/repocheck/actions/workflows/lint.yml/badge.svg)](https://github.com/ymauray/repocheck/actions/workflows/lint.yml)
+[![Release](https://img.shields.io/github/v/release/ymauray/repocheck)](https://github.com/ymauray/repocheck/releases)
+[![Licence MIT](https://img.shields.io/github/license/ymauray/repocheck)](LICENSE)
+
 Plugin Claude Code qui audite la conformité de dépôts GitHub à un référentiel de bonnes pratiques, calcule un score, propose un plan d'action, applique les actions validées et trace tout dans un journal.
 
 ## Contenu
@@ -31,21 +35,34 @@ docs/archives/           référentiel d'origine, avant nettoyage
 Dans Claude Code :
 
 ```
-/plugin marketplace add C:/Users/yannick.mauray/perso/repocheck
+/plugin marketplace add ymauray/repocheck
 /plugin install repocheck@repocheck
 ```
 
-Puis indiquer où écrire le journal, dans `~/.claude/settings.json` :
+Puis indiquer où écrire le journal, dans le bloc `env` de `~/.claude/settings.json` (sans cette variable, le skill demande l'emplacement à chaque exécution) :
 
 ```json
 {
   "env": {
-    "REPOCHECK_JOURNAL": "C:/Users/yannick.mauray/perso/repocheck/journal"
+    "REPOCHECK_JOURNAL": "/chemin/vers/mon/journal"
   }
 }
 ```
 
-Après une modification du skill ou du référentiel, `/plugin marketplace update repocheck` recharge la version locale.
+`/plugin marketplace update repocheck` récupère la dernière version.
+
+### Développer le plugin
+
+Pour travailler sur le skill ou le référentiel, déclarer plutôt la marketplace depuis un clone local : les modifications sont prises en compte après `/plugin marketplace update repocheck`, sans passer par GitHub.
+
+```sh
+git clone https://github.com/ymauray/repocheck.git
+```
+
+```
+/plugin marketplace add /chemin/vers/repocheck
+/plugin install repocheck@repocheck
+```
 
 ## Utilisation
 
@@ -72,6 +89,16 @@ Les scripts sont aussi utilisables seuls :
 bash skills/repocheck/scripts/collect.sh owner/repo > collecte.txt
 bash skills/repocheck/scripts/score.sh statuts.txt   # une ligne « ID OK|KO|NA » par pratique
 ```
+
+## Intégration continue et releases
+
+Tout passe par GitHub Actions ; aucun outil externe n'intervient.
+
+- **Lint** (`.github/workflows/lint.yml`), sur chaque PR et chaque push sur `main` : `bash -n` et `shellcheck` sur les scripts, auto-test de `score.sh` (toutes les pratiques du référentiel notées OK doivent donner 100/100, ce qui vérifie que chaque ligne du tableau est lisible), validité JSON des manifestes. C'est le check requis pour merger sur `main`.
+- **Release** (`.github/workflows/release.yml`), sur chaque push sur `main` : lit `version` dans `.claude-plugin/plugin.json` et, si le tag `vX.Y.Z` n'existe pas encore, crée le tag et la release GitHub (notes générées). Pour publier une version, il suffit donc d'incrémenter `version` dans la PR.
+- **Dependabot** tient à jour les actions utilisées par les workflows.
+
+`main` est protégée : les PR sont mergées en squash après passage du check `Lint`, administrateur compris.
 
 ## Faire évoluer le référentiel
 
