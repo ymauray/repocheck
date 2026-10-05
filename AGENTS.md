@@ -23,6 +23,16 @@ repocheck est un plugin Claude Code. Son skill audite des dépôts GitHub par ra
 - Plugin : incrémenter `version` dans `.claude-plugin/plugin.json` à chaque changement publié ; le workflow `Release` publie la version au merge.
 - Journal : ne jamais modifier une entrée d'exécution passée.
 
+## Cycle de travail
+
+- **`main` est protégée** : le check `Lint` est requis, les administrateurs sont soumis à la règle, et le force-push comme la suppression sont interdits. Aucun commit direct sur `main` : travailler sur une branche, puis ouvrir une PR vers `main`.
+- **Le mainteneur merge lui-même toutes les PR**, en squash. Un agent ne merge jamais.
+- **Au merge**, `Release` publie `v<version>` si la `version` de `.claude-plugin/plugin.json` a changé.
+- **Plugin installé** : il vient de la marketplace GitHub (`ymauray/repocheck`), pas de ce clone. Une modification ne prend effet qu'après le merge, la release et `/plugin marketplace update repocheck`, dans une nouvelle session.
+- **Tester une branche avant merge** : basculer temporairement sur la marketplace locale (`/plugin marketplace remove repocheck`, puis `/plugin marketplace add <chemin du clone>`, puis `/plugin install repocheck@repocheck`), puis revenir à `ymauray/repocheck` une fois le test terminé. Les deux marketplaces portent le même nom et ne peuvent pas coexister.
+- **Journal** : les exécutions du skill l'écrivent dans `journal/` (variable `REPOCHECK_JOURNAL`) et le livrent par une PR `journal/<horodatage>-<repo>` (étape 8 du skill).
+- **Branche `legacy`** : ancien projet PowerShell, à ignorer. Ne pas la modifier.
+
 ## Vérifier
 
 ```sh
