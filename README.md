@@ -111,3 +111,11 @@ Le référentiel est versionné (en tête de `BONNES-PRATIQUES.md`), et chaque j
 ## Score
 
 Les poids sont : 🔴 4 · 🟠 2 · 🟡 1 · ⚪ 0,5. Le score vaut poids OK ÷ (poids OK + poids KO) × 100 ; les `NA` sont exclus. Une dérogation acceptée reste `KO` : elle n'améliore pas le score, mais l'action n'est plus proposée.
+
+### Badge
+
+La mise en conformité propose d'ajouter au README du dépôt audité un badge statique qui affiche la version du référentiel et le score, et qui renvoie vers ce dépôt :
+
+[![repocheck](https://img.shields.io/badge/repocheck%201.3.0-100%2F100-brightgreen)](https://github.com/ymauray/repocheck)
+
+Le badge part dans la PR de mise en conformité, avec le score attendu une fois toutes les actions validées appliquées. Chaque audit vérifie qu'il est à jour et propose de le corriger sinon. C'est une fonctionnalité du skill, pas une pratique : il n'entre pas dans le score. Le format et les couleurs sont décrits dans `remediation.md`.

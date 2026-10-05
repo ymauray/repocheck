@@ -47,6 +47,7 @@ Si un signal manque dans la collecte (contenu d'un fichier précis, sous-dossier
 3. Évaluer **chacune** des pratiques du référentiel : statut `OK`, `KO` ou `NA`, avec les éventuels avertissements que prévoit le référentiel, plus un constat factuel d'une ligne qui cite le signal observé (« enforce_admins.enabled = false », « aucun fichier .editorconfig »). Un `NA` doit s'appuyer sur une condition écrite dans le référentiel.
 4. Si un signal est ambigu (contenu du README, outil de release externe possible, choix de l'assistant IA), poser la question à l'utilisateur plutôt que de trancher au hasard.
 5. Calculer le score avec `scripts/score.sh`, jamais à la main. Le script prend une ligne `ID STATUT` par pratique, lit les poids dans le référentiel et refuse une liste incomplète ou contenant des doublons. Une dérogation s'y écrit `KO`.
+6. Relever le **badge repocheck** du README (voir « Badge repocheck » dans `references/remediation.md`) : absent, à jour, ou périmé (version du référentiel ou score différents du résultat de l'audit). Le badge est une fonctionnalité du skill, pas une pratique : il n'entre pas dans le score.
 
 ## 3. Rapporter
 
@@ -56,7 +57,8 @@ Créer le journal d'exécution (modèle dans `references/journal.md`), puis affi
 - **les KO seulement**, triés par criticité : ID, pratique, constat ;
 - la liste des NA, sur une ligne, avec leur justification abrégée ;
 - les **avertissements** prévus par le référentiel, qui n'entrent pas dans le score ;
-- les éventuelles causes structurelles, par exemple un dépôt privé en plan gratuit (voir le référentiel).
+- les éventuelles causes structurelles, par exemple un dépôt privé en plan gratuit (voir le référentiel) ;
+- l'état du badge repocheck : absent, à jour, ou périmé (ce qu'il affiche et ce qu'il devrait afficher).
 
 ## 4. Proposer un plan
 
@@ -69,17 +71,23 @@ Pour chaque KO hors dérogation, proposer une action d'après `references/remedi
 
 Ordre conseillé : sécurité (SEC) et réglages API sans impact d'abord, puis les fichiers en une seule PR, et la protection de branche **en dernier**, une fois la CI vérifiée.
 
+Ajouter au plan une action **badge** (type PR) si le badge est absent ou ne correspondra pas au score attendu. Ce score est celui que donnera `score.sh` une fois les actions validées appliquées, puisque le badge part dans la PR, avant le merge et avant les actions qui le suivent (protection de branche). L'action est facultative : un refus est consigné dans le journal, sans dérogation.
+
 Écrire le plan dans le journal, puis demander la validation (AskUserQuestion) : tout appliquer, choisir des actions, ou ne rien faire. Pour chaque action refusée, demander s'il s'agit d'un report ou d'une **dérogation durable** et en noter le motif.
+
+Une fois les décisions prises, calculer le **score attendu** avec `scripts/score.sh` : chaque KO visé par une action validée y est passé à `OK`, et les pratiques qu'une action rend applicables (CI-03 et CI-04 à la création d'un workflow, par exemple) y sont évaluées. Le consigner dans le journal : c'est lui qu'affiche le badge.
 
 ## 5. Appliquer (actions validées uniquement)
 
 - **API** : relever l'état « avant », exécuter, relever l'état « après », puis consigner les trois avec la commande de retour arrière, **action par action et immédiatement**.
-- **PR** : suivre « Mise en œuvre d'une PR » dans `references/remediation.md` : clone dans le scratchpad, un commit par pratique, PR non mergée.
+- **PR** : suivre « Mise en œuvre d'une PR » dans `references/remediation.md` : clone dans le scratchpad, un commit par pratique, PR non mergée. Le badge fait l'objet du **dernier** commit, avec le score attendu.
 - En cas d'échec : consigner l'erreur, ne pas improviser de contournement, continuer avec les actions indépendantes et signaler l'échec dans le résumé.
 
 ## 6. Vérifier
 
 Relancer la collecte et l'évaluation, puis consigner l'audit final : nouveau score, pratiques passées à OK, et pratiques en attente du merge de la PR. Ajouter la ligne d'`INDEX.md`.
+
+Si une action validée a échoué ou a été abandonnée, le score attendu ne sera pas atteint : le signaler dans le journal et dans le résumé, car le badge de la PR sera alors faux. La prochaine exécution le détectera comme périmé et proposera de le corriger.
 
 ## 7. Recueillir les retours
 

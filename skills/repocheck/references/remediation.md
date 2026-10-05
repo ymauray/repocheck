@@ -106,6 +106,42 @@ Sur un dépôt privé en plan gratuit (`403`), ces actions sont impossibles. Le 
 |---|---|---|
 | TOOL-01 | PR | **`AGENTS.md` absent** : s'il existe un fichier d'instructions (`CLAUDE.md` complet, `GEMINI.md`...), en reprendre le contenu dans `AGENTS.md` (`git mv` si c'est le seul, pour garder l'historique) en retirant ce qui vise un outil précis. Sinon, rédiger un `AGENTS.md` concis à partir du contenu réel du dépôt : description, commandes de build, de test et de lint, conventions, architecture. **`CLAUDE.md` absent ou sans import** : partir du modèle `templates/CLAUDE.md`. Si `CLAUDE.md` contient des consignes, déplacer dans `AGENTS.md` celles qui sont communes et ne garder que celles propres à Claude Code. Ne pas toucher aux autres fichiers d'instructions. |
 
+## Badge repocheck
+
+Fonctionnalité du skill, pas une pratique du référentiel : le badge n'entre pas dans le score, et son absence n'est jamais un KO. C'est un badge statique shields.io, sans lien avec le journal ni avec un autre dépôt. Un clic renvoie vers le dépôt de repocheck.
+
+```markdown
+[![repocheck](https://img.shields.io/badge/repocheck%20<version>-<score>%2F100-<couleur>)](https://github.com/ymauray/repocheck)
+```
+
+- `<version>` : version du référentiel (`Version :` en tête de `BONNES-PRATIQUES.md`), par exemple `1.3.0`.
+- `<score>` : le **score attendu** (voir l'étape 4 du skill), et non le score au moment de la PR.
+- `<couleur>` selon ce score :
+
+| Score | Couleur |
+|---|---|
+| 90 à 100 | `brightgreen` |
+| 75 à 89 | `green` |
+| 50 à 74 | `yellow` |
+| 25 à 49 | `orange` |
+| 0 à 24 | `red` |
+
+Encodage dans l'URL : espace → `%20`, `/` → `%2F`, et tout `-` du texte doublé (`--`). Exemple pour un score de 100 avec le référentiel 1.3.0 :
+
+```markdown
+[![repocheck](https://img.shields.io/badge/repocheck%201.3.0-100%2F100-brightgreen)](https://github.com/ymauray/repocheck)
+```
+
+**Repérage** : un badge existant est la ligne du README qui contient `img.shields.io/badge/repocheck`. La version et le score se lisent dans son URL ; il est à jour s'ils correspondent au référentiel courant et au score de l'audit.
+
+**Mise en œuvre** (type PR, dernier commit de la PR, `chore(repocheck): badge — <score>/100 (référentiel <version>)`) :
+
+- badge présent : remplacer sa ligne, sans en ajouter un second ;
+- badge absent : l'ajouter à la suite des badges existants en tête du README ou, à défaut, sur une ligne seule juste sous le titre ;
+- pas de README : ne pas proposer de badge (META-04 couvre déjà ce manque).
+
+Si aucune autre action PR n'est prévue, le badge fait l'objet d'une PR à lui seul, intitulée « Badge repocheck (<date>) ».
+
 ## Mise en œuvre d'une PR
 
 1. Cloner dans le scratchpad : `gh repo clone $R <scratchpad>/<repo>`.

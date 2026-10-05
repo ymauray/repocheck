@@ -57,6 +57,10 @@ Règles :
 
 - CI-06 : tags hors versions sur `main` : `jalon-1` … `jalon-11` (n'entrent pas dans le score).
 
+## Badge
+
+- Actuel : `repocheck 1.2.0 | 58/100`, périmé (référentiel courant 1.3.0, score de l'audit 62)
+
 ## Plan proposé
 
 | # | ID | Type | Action | Impact / risque |
@@ -70,6 +74,7 @@ Règles :
 - Validées : 1, 2, 4
 - Refusées : 3 (GOV-07) — « je ne veux pas de Discussions sur ce projet » → enregistrée en dérogation
 - Reportées : 5
+- Score attendu une fois les actions validées appliquées : 81/100 → badge `repocheck 1.3.0 | 81/100`, `green`
 
 ## Actions exécutées
 
@@ -82,7 +87,7 @@ Règles :
 ### 10:58 — PR #12 — ✅
 - URL : https://github.com/owner/repo/pull/12
 - Branche : repocheck/2026-10-05
-- Commits : META-07 (abc1234), GOV-05 (def5678)
+- Commits : META-07 (abc1234), GOV-05 (def5678), badge 81/100 (0a1b2c3)
 - Retour arrière : fermer la PR sans merger
 
 ### 11:02 — BR-05 — API — ❌
