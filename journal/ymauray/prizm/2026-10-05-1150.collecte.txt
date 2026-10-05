@@ -1,0 +1,452 @@
+# Collecte repocheck — ymauray/prizm
+Date : 2026-10-05T09:50:32Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":true,"allow_rebase_merge":false,"allow_squash_merge":false,"archived":false,"default_branch":"main","delete_branch_on_merge":true,"description":"ZX Spectrum 48K and 128K emulator in C# (.NET 10)","fork":false,"full_name":"ymauray/prizm","has_discussions":true,"has_issues":true,"has_pages":false,"has_wiki":true,"homepage":null,"license":"GPL-2.0","owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"enabled"},"secret_scanning":{"status":"enabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"enabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":["apple-silicon","csharp","dotnet","emulator","raylib","retrogaming","z80","zx-spectrum"],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 165
+
+### Racine
+file	.editorconfig
+dir	.github
+file	.gitignore
+file	AGENTS.md
+file	CLAUDE.md
+file	CODE_OF_CONDUCT.md
+file	CONTRIBUTING.md
+file	Directory.Build.props
+file	LICENSE
+file	OVERVIEW.md
+file	Prizm.sln
+file	README.md
+file	SECURITY.md
+dir	examples
+dir	roms
+dir	src
+dir	tests
+
+### Fichiers de configuration, communautaires et manifestes
+.editorconfig
+.github/CODEOWNERS
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+.github/SUPPORT.md
+.github/copilot-instructions.md
+.github/dependabot.yml
+.github/pull_request_template.md
+.github/workflows/ci.yml
+.github/workflows/release.yml
+.gitignore
+AGENTS.md
+CLAUDE.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+LICENSE
+Prizm.sln
+README.md
+SECURITY.md
+roms/README.md
+src/Prizm.App/Prizm.App.csproj
+src/Prizm.Core/Prizm.Core.csproj
+src/Prizm.Z80/Prizm.Z80.csproj
+tests/Prizm.Core.Tests/Prizm.Core.Tests.csproj
+tests/Prizm.Core.Tests/Tape/Libspectrum/README.md
+tests/Prizm.Core.Tests/ThirdParty/README.md
+tests/Prizm.Core.Tests/Z80Test/README.md
+tests/Prizm.Core.Tests/Z80Test/license.txt
+tests/Prizm.Core.Tests/ZxTests/README.md
+tests/Prizm.Z80.Tests/Fuse/README.md
+tests/Prizm.Z80.Tests/Prizm.Z80.Tests.csproj
+tests/Prizm.Z80.Tests/Zex/README.md
+
+===== [repocheck] README =====
+
+~~~~markdown
+# Prizm
+
+[![CI](https://github.com/ymauray/prizm/actions/workflows/ci.yml/badge.svg)](https://github.com/ymauray/prizm/actions/workflows/ci.yml)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
+
+Émulateur ZX Spectrum **48K** et **128K** écrit en C# (.NET 10), pensé d'abord pour macOS sur
+Apple Silicon. Il démarre les ROM d'origine, on y tape du BASIC au clavier du Mac, le beeper et
+la puce son AY du 128K se font entendre, et il charge snapshots (`.SNA`, `.Z80`) et cassettes
+(`.TAP`, `.TZX`), en temps réel ou instantanément, y compris les chargeurs turbo et protégés.
+
+L'architecture et l'état d'avancement sont dans [`OVERVIEW.md`](OVERVIEW.md) ;
+les règles de contribution dans [`CONTRIBUTING.md`](CONTRIBUTING.md) et [`AGENTS.md`](AGENTS.md) ;
+le code de conduite dans [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+
+## Lancer
+
+```sh
+dotnet run --project src/Prizm.App
+```
+
+## Menus
+
+Une barre de menu, en haut de la fenêtre, réunit toutes les commandes avec leur raccourci :
+
+| Menu | Commandes |
+|---|---|
+| **File** | Open... (Cmd+O), Save snapshot (Cmd+S), Show saved files (Cmd+F), Quit (Cmd+Q) |
+| **Machine** | ZX Spectrum 48K (Cmd+1), ZX Spectrum 128K (Cmd+2), Reset (Cmd+R) |
+| **Tape** | Insert tape... (Cmd+Shift+O), Play / Stop (Cmd+Shift+P), Rewind, New recording, Fast loading (Cmd+L), Turbo while loading (Cmd+T) |
+| **Debug** | Show debugger (Cmd+D), Pause / Continue (Cmd+P), Step into (Cmd+I), Step over (Cmd+N), Step out (Cmd+U) |
+| **Help** | About Prizm (licence et copyright des ROM) |
+
+**File > Reload** (Cmd+Shift+R) rouvre le dernier fichier ouvert.
+
+Les coches indiquent le modèle en cours et les options actives. Les libellés sont en anglais :
+la police intégrée de Raylib n'a pas de lettres accentuées.
+
+## Modèles
+
+La machine démarre en 128K. **Cmd+1** allume un 48K, **Cmd+2** un 128K (qui démarre sur son
+menu : les flèches choisissent, Entrée valide), **Cmd+R** redémarre la machine en cours. Dans le
+BASIC 128, les mots-clés se tapent en toutes lettres : `PLAY "cdefgab"` fait jouer la puce AY.
+
+## Clavier
+
+Les caractères sont traduits : tapez-les comme d'habitude sur votre clavier (`"`, `+`, `:`…),
+quelle que soit sa disposition, et l'émulateur appuie sur les touches Spectrum qui les donnent.
+
+| Mac | Spectrum |
+|---|---|
+| Maj seule | Caps Shift |
+| Ctrl seul | Symbol Shift |
+| Ctrl + touche | combinaison brute, touches lues par position (QWERTY) |
+| Entrée | ENTER |
+| Retour arrière | DELETE |
+| Échap | BREAK |
+| Flèches | curseurs |
+| Tab | mode étendu (Caps Shift + Symbol Shift) |
+| F1 … F9 | Caps Shift + 1 … 9 (F1 EDIT, F2 CAPS LOCK, F9 GRAPHICS) |
+
+Sur Mac, les touches F1 à F9 demandent Fn, sauf si elles sont réglées comme touches de fonction
+standard dans les réglages du clavier. Les caractères du mode étendu (`[ ] { } ~ | \ ©`) se
+tapent aussi comme les autres : l'émulateur passe lui-même en mode étendu, puis appuie sur
+Symbol Shift et la touche. On peut toujours faire comme sur le Spectrum : Tab, puis Ctrl + la
+touche. Pour quitter, fermez la fenêtre.
+
+## Snapshots et cassettes
+
+L'émulateur ouvre les snapshots `.SNA` et `.Z80` (48K et 128K) et les cassettes `.TAP` et
+`.TZX` :
+
+- glisser-déposer du fichier sur la fenêtre ;
+- **Cmd+O** : sélecteur de fichier (macOS ; `zenity` sous Linux) ;
+- en argument : `dotnet run --project src/Prizm.App -- jeu.tap`.
+
+Une cassette redémarre la machine, qui tape `LOAD ""` d'elle-même (sur le 128K, elle choisit
+« Tape Loader » dans le menu). Par défaut, elle se charge **en temps réel**, comme en 1983 : son de chargement, bandes de couleur dans la bordure, et
+quelques minutes d'attente pour un gros jeu. **Turbo while loading** (Cmd+T) joue la cassette en accéléré, sans le son ; **Fast loading**
+(Cmd+L) la court-circuite et copie chaque bloc en mémoire (instantané, sans signal, mais
+seulement pour les blocs que la ROM charge à sa vitesse). Le titre de la fenêtre
+indique le bloc de la cassette en cours de lecture. Un snapshot, lui, se charge dans le
+modèle qu'il indique.
+
+Une cassette `.TZX` décrit aussi les chargeurs turbo et protégés (Speedlock, Alkatraz…) : leurs
+blocs se chargent toujours en temps réel, même en chargement rapide, et **Turbo while loading**
+les accélère. La cassette démarre d'elle-même quand la ROM ou un chargeur écoute le signal, et
+s'arrête aux blocs qui le demandent (entre deux niveaux, par exemple). Si un programme attend
+qu'on relance la cassette sans l'écouter, **Tape > Play / Stop** (Cmd+Shift+P) la relance ;
+**Tape > Rewind** la rembobine. Quand une cassette `.TZX` propose un menu (face A ou B, choix
+du niveau…), elle s'arrête et l'affiche : les flèches et Entrée, un chiffre ou un clic
+choisissent, Échap continue au bloc suivant. Pour un jeu en plusieurs faces ou cassettes, **Tape > Insert
+tape...** (Cmd+Shift+O) met une autre cassette dans le lecteur sans redémarrer la machine,
+contrairement à **File > Open**.
+
+**Cmd+S** sauvegarde l'état de la machine en `.SNA` dans `~/Documents/Prizm/`, et
+**Cmd+F** ouvre ce dossier dans le Finder.
+
+`SAVE` enregistre dans ce même dossier, instantanément, dans un `.TAP` nommé d'après le
+programme (`SAVE "jeu"` crée `jeu.tap`). Comme sur une cassette laissée en enregistrement, les
+`SAVE` suivants s'ajoutent au même fichier ; **Tape > New recording** fait commencer le
+prochain dans un nouveau fichier. Un programme qui appelle la routine `SA-BYTES` de la ROM
+(`0x04C2`) est enregistré de la même façon. Ne jamais committer de jeux commerciaux ou de
+fichiers sous copyright dans le dépôt.
+
+## Écrire ses programmes
+
+Prizm est pensé pour développer en assembleur Z80 avec
+[sjasmplus](https://github.com/z00m128/sjasmplus). L'exemple `examples/hello.asm` affiche un
+message par la ROM :
+
+```sh
+mkdir -p build && cd build
+sjasmplus --sym=hello.sym ../examples/hello.asm
+```
+
+sjasmplus écrit dans le dossier courant `hello.sna` (un snapshot, pour développer : il se charge
+instantanément et démarre sur `start`), `hello.tap` (une cassette, pour partager ; elle contient
+presque toute la RAM et se charge lentement en temps réel) et `hello.sym` (les symboles).
+Ouvrez `hello.sna` : le fichier `hello.sym` voisin est chargé avec lui. Après chaque
+modification, réassemblez puis faites **Cmd+Shift+R** : le programme est rechargé, en gardant
+les points d'arrêt.
+
+## Débogueur
+
+**Cmd+D** affiche le débogueur : l'image passe en taille double, avec la mémoire et une ligne
+de commande en dessous, et à droite l'état, les registres, les drapeaux, le désassemblage (avec
+les symboles) et les points d'arrêt, dans la police du Spectrum. Un clic sur une ligne du
+désassemblage pose ou retire un point d'arrêt (`*`). Pendant une pause, l'écran montre la
+mémoire telle qu'elle est à cet instant, et le clavier va à la ligne de commande :
+
+| Commande | Effet |
+|---|---|
+| `s`, `n`, `u`, `c`, `p` | pas à pas, pas par-dessus (CALL, RST, DJNZ, LDIR…), sortie de routine, reprise, pause |
+| `b ADRESSE` | pose ou retire un point d'arrêt |
+| `w ADRESSE` | arrête après toute écriture à cette adresse |
+| `pr PORT`, `pw PORT` | arrête après une lecture ou une écriture de port (`$FE` : tout port pair de l'ULA) |
+| `clear` | retire tous les points d'arrêt et surveillances |
+| `m ADRESSE`, `d [ADRESSE]` | vue mémoire ; désassemblage à partir d'une adresse (seul : suit PC) |
+
+Une adresse s'écrit `$8000`, `0x8000`, `8000h`, `32768`, ou avec un symbole : `start`,
+`start.next`, `score+1`. Le désassembleur ne sait pas distinguer le code des données : les
+octets qui suivent une étiquette de données (comme `message`) s'affichent comme des
+instructions ; la vue mémoire les montre tels quels.
+
+## Tester
+
+```sh
+dotnet test -c Release                   # tout, environ 50 s
+dotnet test --filter "Category!=Slow"    # sans ZEXDOC ni ZEXALL, quelques secondes
+```
+
+### Tests de timing (Richard Butler)
+
+Les 72 tests de timing de Richard Butler (`TimingTests.cs`) vérifient la durée d'instructions en
+mémoire contendue et le bus flottant. Faute de licence open source formellement déclarée, leurs
+fichiers ne sont pas committés dans le dépôt (les tests sont automatiquement ignorés s'ils sont absents).
+
+Pour les exécuter, téléchargez `timing_tests_48k_v1.0.z80` et les quatre fichiers `.scr` associés depuis
+[EmulatorTestSuites](https://github.com/MrKWatkins/EmulatorTestSuites/tree/main/src/MrKWatkins.EmulatorTestSuites.ZXSpectrum/Timing)
+ou [zxspectrum4.net](https://www.zxspectrum4.net/op_timing.php), puis déposez-les dans `local/` :
+
+```sh
+mkdir -p local/timing-tests/screens
+# Déposez timing_tests_48k_v1.0.z80 dans local/timing-tests/
+# Déposez 35-contended.scr, 35-uncontended.scr, 36-contended.scr, 37-contended.scr dans local/timing-tests/screens/
+```
+
+### Intégration continue (CI/CD)
+
+Le projet utilise GitHub Actions pour valider et livrer chaque modification :
+- **Multiplateforme** : compilation et exécution des tests sous macOS (`macos-latest`, Apple Silicon) et Linux (`ubuntu-latest`).
+- **Tests unitaires rapides** (`Category!=Slow`) exécutés à chaque pull request et push.
+- **Tests de conformité Z80 complets** (ZEXDOC et ZEXALL) exécutés sur macOS lors de chaque push sur la branche `main`.
+- **Publication automatisée** : la création d'un tag Git `v*` déclenche la génération et la publication automatique des binaires pour macOS Apple Silicon et Linux via GitHub Releases.
+
+## ROM et fichiers tiers
+
+La ROM du Spectrum 48K (`roms/48.rom`) est © 1982 Sinclair Research Ltd, droits détenus par
+Amstrad, et n'est pas couverte par la licence du projet. Amstrad autorise sa redistribution,
+mais pas sa vente ni son intégration dans du matériel. Voir [`roms/README.md`](roms/README.md).
+
+Les fichiers de test FUSE, ZEXDOC/ZEXALL, z80test et zxtests sont sous licence libre (GPL ou MIT) ;
+leur provenance est décrite dans le `README.md` de leurs dossiers respectifs. Les tests de timing de
+Richard Butler se déposent dans `local/timing-tests/` (voir section *Tester* ci-dessus).
+
+## Licence
+
+Copyright © 2026 les contributeurs de Prizm.
+
+Prizm est un logiciel libre, distribué sous licence **GNU GPL version 2 ou ultérieure**
+(`GPL-2.0-or-later`) : vous pouvez le redistribuer et le modifier selon les termes de la GPL,
+version 2 ou (à votre choix) toute version ultérieure. Il est fourni sans aucune garantie.
+Texte complet dans [`LICENSE`](LICENSE).
+
+La ROM (`roms/`) n'est pas couverte par cette licence (voir plus haut).
+~~~~
+
+===== [repocheck] Workflows =====
+
+### .github/workflows/ci.yml
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Display .NET info
+        run: dotnet --info
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build (Release)
+        run: dotnet build -c Release --no-restore
+
+      - name: Run fast tests
+        run: dotnet test -c Release --no-build --filter "Category!=Slow"
+
+      - name: Run slow tests (ZEXDOC & ZEXALL on push to main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.os == 'macos-latest'
+        run: dotnet test -c Release --no-build --filter "Category=Slow"
+```
+### .github/workflows/release.yml
+```yaml
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build macOS Apple Silicon package
+        run: |
+          dotnet publish src/Prizm.App -c Release -r osx-arm64 --self-contained false -o publish-osx-arm64
+          tar -czf Prizm-${{ github.ref_name }}-osx-arm64.tar.gz -C publish-osx-arm64 .
+
+      - name: Build Linux package
+        run: |
+          dotnet publish src/Prizm.App -c Release -r linux-x64 --self-contained false -o publish-linux-x64
+          tar -czf Prizm-${{ github.ref_name }}-linux-x64.tar.gz -C publish-linux-x64 .
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            Prizm-${{ github.ref_name }}-osx-arm64.tar.gz \
+            Prizm-${{ github.ref_name }}-linux-x64.tar.gz \
+            --title "Prizm ${{ github.ref_name }}" \
+            --generate-notes
+```
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+# CLAUDE.md
+
+Les consignes de ce projet sont dans **`AGENTS.md`** (communes à tous les agents de code) :
+les lire et les respecter avant toute modification. Voir aussi **`OVERVIEW.md`** pour
+l'architecture et l'état d'avancement.
+
+@AGENTS.md
+
+AGENTS.md : présent à la racine
+
+===== [repocheck] dependabot.yml =====
+
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+===== [repocheck] Protection de branche classique (main) =====
+
+{"url":"https://api.github.com/repos/ymauray/prizm/branches/main/protection","required_status_checks":{"url":"https://api.github.com/repos/ymauray/prizm/branches/main/protection/required_status_checks","strict":false,"contexts":["Build & Test (macos-latest)","Build & Test (ubuntu-latest)"],"contexts_url":"https://api.github.com/repos/ymauray/prizm/branches/main/protection/required_status_checks/contexts","checks":[{"context":"Build & Test (macos-latest)","app_id":15368},{"context":"Build & Test (ubuntu-latest)","app_id":15368}]},"required_signatures":{"url":"https://api.github.com/repos/ymauray/prizm/branches/main/protection/required_signatures","enabled":false},"enforce_admins":{"url":"https://api.github.com/repos/ymauray/prizm/branches/main/protection/enforce_admins","enabled":true},"required_linear_history":{"enabled":false},"allow_force_pushes":{"enabled":false},"allow_deletions":{"enabled":false},"block_creations":{"enabled":false},"required_conversation_resolution":{"enabled":false},"lock_branch":{"enabled":false},"allow_fork_syncing":{"enabled":false}}
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":true,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":true}
+
+===== [repocheck] Tags (100 premiers) =====
+
+jalon-11	sur main
+jalon-10	sur main
+jalon-9	sur main
+jalon-8	sur main
+jalon-7	sur main
+jalon-6	sur main
+jalon-5	sur main
+jalon-4	sur main
+jalon-3	sur main
+jalon-2	sur main
+jalon-1	sur main
+
+===== [repocheck] Releases (10 dernières) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] GitHub Pages =====
+
+ÉCHEC HTTP 404 : {"message":"Not Found","documentation_url":"https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site","status":"404"}gh: Not Found (HTTP 404)
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+Build & Test (ubuntu-latest)	success	app=github-actions
+Build & Test (macos-latest)	success	app=github-actions
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+

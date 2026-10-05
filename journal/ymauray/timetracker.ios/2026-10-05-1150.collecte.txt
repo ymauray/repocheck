@@ -1,0 +1,327 @@
+# Collecte repocheck — ymauray/timetracker.ios
+Date : 2026-10-05T09:50:48Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":false,"allow_rebase_merge":false,"allow_squash_merge":true,"archived":false,"default_branch":"main","delete_branch_on_merge":true,"description":"Pointage — app iPhone de pointage des heures de travail, compagne de la CLI TimeTracker","fork":false,"full_name":"ymauray/timetracker.ios","has_discussions":true,"has_issues":true,"has_pages":true,"has_wiki":false,"homepage":"https://ymauray.github.io/timetracker.ios/","license":"MIT","owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"enabled"},"secret_scanning":{"status":"enabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"enabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":["grdb","ios","swift","swiftui","time-tracking","timesheet","xcodegen"],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 80
+
+### Racine
+file	.editorconfig
+dir	.github
+file	.gitignore
+file	AGENTS.md
+file	AVANCEMENT.md
+file	CLAUDE.md
+file	CODE_OF_CONDUCT.md
+file	CONTRIBUTING.md
+file	LICENSE
+dir	Pointage.xcodeproj
+file	README.md
+dir	Resources
+file	SECURITY.md
+file	SPECS.md
+file	SUPPORT.md
+dir	Sources
+dir	Tests
+dir	UITests
+dir	ci_scripts
+dir	docs
+file	project.yml
+
+### Fichiers de configuration, communautaires et manifestes
+.editorconfig
+.github/ISSUE_TEMPLATE/bug_report.md
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature_request.md
+.github/PULL_REQUEST_TEMPLATE.md
+.github/dependabot.yml
+.github/workflows/ios.yml
+.gitignore
+AGENTS.md
+CLAUDE.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+LICENSE
+README.md
+SECURITY.md
+SUPPORT.md
+ci_scripts/ci_post_clone.sh
+
+===== [repocheck] README =====
+
+~~~~markdown
+# Pointage
+
+[![iOS CI](https://github.com/ymauray/timetracker.ios/actions/workflows/ios.yml/badge.svg?branch=main)](https://github.com/ymauray/timetracker.ios/actions/workflows/ios.yml)
+[![Licence MIT](https://img.shields.io/github/license/ymauray/timetracker.ios)](LICENSE)
+![iOS 26+](https://img.shields.io/badge/iOS-26%2B-14615b)
+
+App iPhone native de pointage des heures de travail. Un bouton enregistre
+l'heure courante et en déduit l'arrivée, la pause ou le départ ; l'app applique
+les calculs de la CLI [TimeTracker](https://github.com/ymauray/timetracker) et
+affiche les soldes de la semaine et du mois. Aucune donnée ne quitte l'appareil.
+
+Site : [ymauray.github.io/timetracker.ios](https://ymauray.github.io/timetracker.ios/), avec la
+[politique de confidentialité](https://ymauray.github.io/timetracker.ios/confidentialite.html).
+
+- [`AGENTS.md`](AGENTS.md) — les consignes de travail, à lire en premier
+- [`SPECS.md`](SPECS.md) — ce que l'on construit, les règles métier et les décisions prises
+- [`AVANCEMENT.md`](AVANCEMENT.md) — où on en est, et le plan de chaque étape
+- [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SUPPORT.md`](SUPPORT.md), [`SECURITY.md`](SECURITY.md) — contribuer, obtenir de l'aide, signaler une faille
+
+## Installer
+
+L'app est en test sur TestFlight, par invitation ; elle n'est pas encore sur
+l'App Store. Pour l'essayer sans invitation, la compiler depuis les sources
+(voir « Construire ») et la lancer sur un simulateur ou un iPhone.
+
+## Utiliser
+
+- **Pointer** : un appui enregistre l'heure. Le bouton annonce l'action
+  suivante (arrivée, pause ou départ, fin de pause, départ) ; « Annuler le
+  dernier pointage » rattrape un appui de trop.
+- **Historique** : les jours par semaine, avec l'écart de chacun. Toucher un
+  jour pour corriger ses heures ou y mettre une absence ; « + » ajoute une
+  journée oubliée.
+- **Réglages** : durée de la journée, pause minimum, seuil de pause et
+  tolérance, valables pour tout l'historique. L'export produit un `releve.md`
+  que la CLI lit tel quel ; l'import reprend un `releve.md` existant et
+  remplace l'historique après confirmation.
+
+Les soldes se lisent au soir d'hier : aujourd'hui n'y entre jamais, il se lit
+dans le réalisé du jour. Une demi-journée de congé ou une maladie survenue en
+cours de journée se saisissent avec les heures travaillées et le motif
+(« Absence partielle » dans l'édition d'une journée).
+
+## Structure
+
+```
+project.yml          description du projet, source de vérité (XcodeGen)
+Sources/
+  App/               point d'entrée
+  Domain/            calcul des soldes, sans SwiftUI ni GRDB
+  Data/              base SQLite (GRDB)
+  Features/          un dossier par écran
+  Design/            couleurs, formats d'heures
+  Preferences/       réglages (UserDefaults)
+Resources/           icône d'app
+Tests/               tests unitaires (Swift Testing)
+  Fixtures/          copie des fixtures de la CLI, à ne pas modifier ici
+UITests/             tests d'interface (XCTest), app lancée avec -tests-interface
+ci_scripts/          Xcode Cloud
+docs/                site GitHub Pages et politique de confidentialité
+```
+
+## Construire
+
+Il faut Xcode (iOS 26 minimum) et XcodeGen (`brew install xcodegen`).
+`project.yml` est la source de vérité. Après toute modification, régénérer :
+
+```sh
+xcodegen generate
+open Pointage.xcodeproj
+```
+
+Le `.xcodeproj` est malgré tout committé : Xcode Cloud a besoin de trouver le
+projet et son schéma partagé dans le dépôt.
+
+Tests :
+
+```sh
+xcodebuild -project Pointage.xcodeproj -scheme Pointage \
+  -destination 'platform=iOS Simulator,name=iPhone 16 (référence)' test
+```
+
+## Livraison
+
+Deux pipelines, qui ne valident pas la même chose :
+
+- **GitHub Actions** (`.github/workflows/ios.yml`) se déclenche sur toutes les
+  branches : régénération par XcodeGen, compilation, tests. Un second job compare
+  `Tests/Fixtures/` avec celles de la branche `main` de la CLI.
+- **Xcode Cloud** (`ci_scripts/ci_post_clone.sh`) surveille `pre-release` : il
+  ajoute la résolution figée des paquets, la signature et la livraison
+  TestFlight. Les fusions sur `main` ne livrent rien ; une version part sur
+  TestFlight quand `main` est amenée sur `pre-release`.
+
+Pour livrer, amener `main` sur `pre-release` en avance rapide : Xcode Cloud
+démarre le build tout seul.
+
+Le numéro de build vient d'Xcode Cloud, pas de `project.yml` : le script de
+post-clone y reporte `$CI_BUILD_NUMBER` avant de régénérer le projet.
+
+`main` est protégée : les deux vérifications de GitHub Actions doivent passer,
+administrateur compris, et les *pull requests* se fusionnent en squash. Les
+dépendances (GRDB, actions GitHub) sont suivies par Dependabot. Le site
+(`docs/`) est servi par GitHub Pages depuis `main`.
+
+Seule dépendance : GRDB. `Package.resolved` doit rester versionné dans
+`Pointage.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/` : Xcode Cloud
+désactive la résolution automatique des paquets et s'arrête sans lui, ce que
+GitHub Actions ne peut pas détecter.
+
+**Créer un processus Xcode Cloud avec Xcode 27** bute sur un défaut de
+l'assistant : il exige de connecter chaque dépôt dont dépend le projet, même
+public et appartenant à quelqu'un d'autre, ce qui est impossible. Le processus
+existant n'est pas concerné, ses builds récupèrent les paquets publics sans
+autorisation. Pour en créer un nouveau, retirer les paquets de `project.yml` le
+temps de l'assistant, sans commiter, puis les remettre
+([question Stack Overflow](https://stackoverflow.com/questions/80006430/unable-to-create-new-xcode-cloud-workflow-on-xcode-27)).
+~~~~
+
+===== [repocheck] Workflows =====
+
+### .github/workflows/ios.yml
+```yaml
+name: iOS CI
+
+# Toutes les branches, pas seulement main : le travail se fait sur des branches
+# poussées régulièrement, et c'est là que le filet doit se tendre. Une exécution
+# déclenchée par un push satisfait aussi la vérification exigée par la protection
+# de main, GitHub rattachant les résultats au commit de tête et non à
+# l'événement qui les a produits — d'où l'absence de déclencheur pull_request,
+# qui ne ferait que doubler chaque exécution.
+on:
+  push:
+    branches: [ '**' ]
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    name: Compilation et tests iOS
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Installer XcodeGen
+        run: brew install xcodegen
+
+      # Le projet est régénéré depuis project.yml, qui reste la source de vérité même si
+      # le .xcodeproj est committé pour Xcode Cloud.
+      - name: Générer le projet Xcode
+        run: xcodegen generate
+
+      - name: Compiler et tester
+        run: |
+          UDID=$(xcrun simctl list devices available -j \
+            | jq -r '[.devices | to_entries[] | select(.key | contains("iOS")) | .value[]] | first | .udid')
+          xcodebuild \
+            -project Pointage.xcodeproj \
+            -scheme Pointage \
+            -destination "platform=iOS Simulator,id=$UDID" \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+  # Les fixtures naissent dans le dépôt de la CLI, qui fait référence pour le
+  # calcul. Ce dépôt n'en garde qu'une copie, pour qu'Xcode Cloud n'ait rien à
+  # récupérer ailleurs ; ce job échoue dès que la copie a dérivé de la branche
+  # main de la CLI.
+  fixtures:
+    name: Fixtures alignées sur la CLI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Checkout de la CLI
+        uses: actions/checkout@v7
+        with:
+          repository: ymauray/timetracker
+          ref: main
+          path: cli
+
+      - name: Comparer les fixtures
+        run: diff -r cli/tests/TimeTracker.Tests/Fixtures Tests/Fixtures
+```
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+Les consignes de travail sont dans [`AGENTS.md`](AGENTS.md).
+
+AGENTS.md : présent à la racine
+
+===== [repocheck] dependabot.yml =====
+
+version: 2
+updates:
+  # Les paquets Swift : GRDB, déclaré dans project.yml (« from: 7.0.0 ») et figé
+  # dans le Package.resolved du .xcodeproj, que Dependabot lit sans Package.swift.
+  # Ses mises à jour restent dans la version majeure et ne touchent que
+  # Package.resolved ; changer de version majeure passe par project.yml.
+  - package-ecosystem: "swift"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+===== [repocheck] Protection de branche classique (main) =====
+
+{"url":"https://api.github.com/repos/ymauray/timetracker.ios/branches/main/protection","required_status_checks":{"url":"https://api.github.com/repos/ymauray/timetracker.ios/branches/main/protection/required_status_checks","strict":true,"contexts":["Compilation et tests iOS","Fixtures alignées sur la CLI"],"contexts_url":"https://api.github.com/repos/ymauray/timetracker.ios/branches/main/protection/required_status_checks/contexts","checks":[{"context":"Compilation et tests iOS","app_id":15368},{"context":"Fixtures alignées sur la CLI","app_id":15368}]},"required_signatures":{"url":"https://api.github.com/repos/ymauray/timetracker.ios/branches/main/protection/required_signatures","enabled":false},"enforce_admins":{"url":"https://api.github.com/repos/ymauray/timetracker.ios/branches/main/protection/enforce_admins","enabled":true},"required_linear_history":{"enabled":false},"allow_force_pushes":{"enabled":false},"allow_deletions":{"enabled":false},"block_creations":{"enabled":false},"required_conversation_resolution":{"enabled":false},"lock_branch":{"enabled":false},"allow_fork_syncing":{"enabled":false}}
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":true,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":true}
+
+===== [repocheck] Tags (100 premiers) =====
+
+(aucun tag)
+
+===== [repocheck] Releases (10 dernières) =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] GitHub Pages =====
+
+{"build_type":"legacy","cname":null,"html_url":"https://ymauray.github.io/timetracker.ios/","status":"built"}
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+deploy	success	app=github-actions
+report-build-status	success	app=github-actions
+Analyze (actions)	success	app=github-actions
+build	success	app=github-actions
+Fixtures alignées sur la CLI	success	app=github-actions
+Compilation et tests iOS	failure	app=github-actions
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+

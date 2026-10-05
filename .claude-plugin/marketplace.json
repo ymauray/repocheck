@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "repocheck",
+  "description": "Marketplace locale du plugin repocheck",
+  "owner": {
+    "name": "ymauray"
+  },
+  "plugins": [
+    {
+      "name": "repocheck",
+      "description": "Audit et mise en conformité des dépôts GitHub",
+      "source": "./"
+    }
+  ]
+}

@@ -1,0 +1,489 @@
+# Collecte repocheck — ymauray/paige
+Date : 2026-10-05T09:50:57Z
+
+===== [repocheck] Dépôt =====
+
+{"allow_merge_commit":true,"allow_rebase_merge":true,"allow_squash_merge":true,"archived":false,"default_branch":"main","delete_branch_on_merge":false,"description":"Paige: un outil pour générer des epubs","fork":false,"full_name":"ymauray/paige","has_discussions":false,"has_issues":true,"has_pages":false,"has_wiki":false,"homepage":null,"license":"MIT","owner_type":"User","private":false,"security_and_analysis":{"dependabot_security_updates":{"status":"disabled"},"secret_scanning":{"status":"disabled"},"secret_scanning_non_provider_patterns":{"status":"disabled"},"secret_scanning_push_protection":{"status":"disabled"},"secret_scanning_validity_checks":{"status":"disabled"}},"topics":[],"visibility":"public"}
+
+===== [repocheck] Collaborateurs (login, rôle) =====
+
+ymauray admin
+
+===== [repocheck] Arborescence (racine, puis fichiers pertinents) =====
+
+Arbre tronqué par l'API : false
+Nombre de fichiers : 31
+
+### Racine
+dir	.github
+file	.gitignore
+file	CODE_OF_CONDUCT.md
+file	CONTRIBUTING.md
+file	GEMINI.md
+file	LICENSE
+dir	Paige.Tests
+file	Paige.slnx
+dir	Paige
+file	README.md
+file	SECURITY.md
+file	SPECS.md
+file	SUPPORT.md
+file	nfpm.yaml
+
+### Fichiers de configuration, communautaires et manifestes
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+.github/dependabot.yml
+.github/pull_request_template.md
+.github/workflows/dotnet.yml
+.github/workflows/release.yml
+.gitignore
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+GEMINI.md
+LICENSE
+Paige.Tests/Paige.Tests.csproj
+Paige/Paige.csproj
+README.md
+SECURITY.md
+SUPPORT.md
+
+===== [repocheck] README =====
+
+~~~~markdown
+# 📖 Paige — Moteur de création d'EPUB 3
+
+[![Statut du Build](https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat-square)](#)
+[![Licence : MIT](https://img.shields.io/badge/Licence-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![.NET 10](https://img.shields.io/badge/.NET-10-blueviolet.svg?style=flat-square)](https://dotnet.microsoft.com/)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
+
+**Paige** est un outil CLI élégant et pensé pour les développeurs, conçu pour compiler des fichiers sources `.paige` modulaires en archives **EPUB 3** parfaitement valides. Arrêtez de vous battre avec les structures ZIP et le boilerplate XML — concentrez-vous sur l'écriture de votre livre. 🚀
+
+---
+
+## ✨ Fonctionnalités
+
+- 🏗️ **DSL Déclaratif** : Définissez la structure de votre livre avec un langage simple et lisible par l'humain.
+- 🧩 **Contenu Modulaire** : Utilisez `#include` pour découper votre livre en chapitres gérables.
+- 🖼️ **Gestion des Assets** : Ajoutez facilement des images, polices et feuilles de style via le manifeste.
+- 📝 **XHTML Inline** : Écrivez du contenu directement dans vos fichiers `.paige` ou pointez vers des sources externes.
+- 🧭 **Génération Automatique** : 
+  - `nav.xhtml` (Table des matières) généré automatiquement à partir de la "spine".
+  - Génération intelligente de `cover.xhtml`.
+  - Fichiers `content.opf` et `container.xml` valides.
+- ✅ **Respect des Standards** : Produit des fichiers EPUB 3.0.1 prêts pour les liseuses.
+- 🧪 **Robuste** : Développé avec un TDD strict (100%) et des tests unitaires complets.
+
+---
+
+## 🛠️ Installation
+
+```bash
+# Cloner le dépôt
+git clone https://github.com/votre-nom/paige.git
+cd paige
+
+# Compiler le projet
+dotnet build Paige/Paige.csproj
+
+# (Optionnel) Installer comme outil global (bientôt disponible)
+# dotnet tool install --global Paige
+```
+
+---
+
+## 🚀 Démarrage Rapide
+
+### 1. Créez votre fichier source (`livre.paige`)
+
+```paige
+#metadata(
+    identifier: "978-3-16-148410-0",
+    title: "Les Chroniques de Paige",
+    language: fr
+)
+
+#manifest.add(
+    id: "cover-image",
+    href: "cover.jpg",
+    mediaType: "image/jpeg",
+    properties: "cover-image",
+    source: "assets/cover.jpg"
+)
+
+#include "chapitres/01-introduction.paige"
+
+#manifest.add(
+    id: "outro",
+    href: "outro.xhtml",
+    mediaType: "application/xhtml+xml",
+    spine: true,
+    nav: "Le mot de la fin"
+)[
+  <body>
+    <h1>Merci de votre lecture !</h1>
+    <p>Généré avec amour par Paige.</p>
+  </body>
+]
+```
+
+### 2. Compilez en EPUB
+
+```bash
+dotnet run --project Paige -- --project-root . --output build/mon-livre.epub
+```
+
+---
+
+## 💻 Utilisation CLI
+
+| Option | Description | Défaut |
+|:---|:---|:---|
+| `--project-root` | Le dossier racine contenant vos fichiers `.paige`. | `.` |
+| `--output` | Chemin de destination pour le fichier `.epub` généré. | `mybook.epub` |
+| `--help` | Affiche les commandes et options disponibles. | - |
+
+---
+
+## 🧐 Origine du nom
+
+Le nom **Paige** est un hommage à **James W. Paige** et à son invention monumentale, la [Paige Compositor](https://fr.wikipedia.org/wiki/Composeuse_Paige). 
+
+Cette machine à composer, bien que d'une complexité mécanique incroyable (plus de 18 000 pièces), est restée célèbre pour avoir causé la faillite de **Mark Twain**. Là où l'originale était trop complexe pour son propre bien, notre outil **Paige** se veut l'exact opposé : une solution simple, robuste et efficace pour composer vos œuvres numériques. 📚
+
+---
+
+## 🏗️ Architecture
+
+Paige utilise un pipeline de compilation moderne :
+
+1. 🔍 **Lexer** : Analyse lexicale du source `.paige`.
+2. 📐 **Parser** : Construit un **Epub Syntactic Tree (EST)** structuré.
+3. 📦 **Générateur** : Pilote la `ZipArchive` pour produire le paquet EPUB final.
+
+---
+
+## 🧪 Développement & Méthodologie
+
+Nous suivons une méthodologie **TDD (Test-Driven Development)** stricte. Chaque fonctionnalité est vérifiée par une suite de plus de 60 tests.
+
+```bash
+# Lancer la suite de tests
+dotnet test Paige.Tests/Paige.Tests.csproj
+```
+
+---
+
+## 📜 Licence
+
+Distribué sous la licence **MIT**. Voir `LICENSE` pour plus d'informations.
+
+---
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Veuillez vous assurer de respecter la norme [Conventional Commits](https://conventionalcommits.org) et d'inclure des tests pour toute nouvelle fonctionnalité.
+
+---
+
+<p align="center">Fait avec ❤️ pour les auteurs et les développeurs.</p>
+~~~~
+
+===== [repocheck] Workflows =====
+
+### .github/workflows/dotnet.yml
+```yaml
+name: .NET Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal
+```
+### .github/workflows/release.yml
+```yaml
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag à simuler (ex: v0.1.1)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive: paige-linux-x64.tar.gz
+          - os: windows-latest
+            rid: win-x64
+            archive: paige-win-x64.zip
+          - os: macos-latest
+            rid: osx-arm64
+            archive: paige-osx-arm64.tar.gz
+
+    steps:
+      - name: Set release tag
+        run: echo "RELEASE_TAG=${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}" >> $GITHUB_ENV
+        shell: bash
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.x'
+
+      - name: Publish
+        run: >
+          dotnet publish Paige/Paige.csproj
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained
+          -p:PublishSingleFile=true
+          -o out
+
+      - name: Archive (Linux / macOS)
+        if: runner.os != 'Windows'
+        run: tar -czf ${{ matrix.archive }} -C out paige
+
+      - name: Archive (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path out\paige.exe -DestinationPath ${{ matrix.archive }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.archive }}
+          path: ${{ matrix.archive }}
+
+      - name: Install nfpm
+        if: runner.os == 'Linux'
+        run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt-get update -q
+          sudo apt-get install -y nfpm
+
+      - name: Package (.deb / .rpm)
+        if: runner.os == 'Linux'
+        run: |
+          VERSION=${RELEASE_TAG#v} nfpm package --config nfpm.yaml --packager deb --target paige-linux-x64.deb
+          VERSION=${RELEASE_TAG#v} nfpm package --config nfpm.yaml --packager rpm --target paige-linux-x64.rpm
+
+      - uses: actions/upload-artifact@v7
+        if: runner.os == 'Linux'
+        with:
+          name: paige-linux-x64.deb
+          path: paige-linux-x64.deb
+
+      - uses: actions/upload-artifact@v7
+        if: runner.os == 'Linux'
+        with:
+          name: paige-linux-x64.rpm
+          path: paige-linux-x64.rpm
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set release tag
+        run: echo "RELEASE_TAG=${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}" >> $GITHUB_ENV
+
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: artifacts/*
+          generate_release_notes: true
+
+      - name: Update Homebrew tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION=${RELEASE_TAG#v}
+          MACOS_SHA=$(curl -sL "https://github.com/ymauray/paige/releases/download/${RELEASE_TAG}/paige-osx-arm64.tar.gz" | sha256sum | cut -d' ' -f1)
+          LINUX_SHA=$(curl -sL "https://github.com/ymauray/paige/releases/download/${RELEASE_TAG}/paige-linux-x64.tar.gz" | sha256sum | cut -d' ' -f1)
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/ymauray/homebrew-tap.git" tap
+          cd tap
+          BRANCH="automation/paige/${RELEASE_TAG}"
+          PR_STATE=$(GH_TOKEN="${HOMEBREW_TAP_TOKEN}" gh pr list --repo ymauray/homebrew-tap --head "$BRANCH" --state all --json state --jq '.[0].state // empty')
+          if [ "$PR_STATE" = "CLOSED" ]; then
+            echo "The Homebrew pull request for ${RELEASE_TAG} was closed without merging."
+            exit 1
+          fi
+          git checkout -B "$BRANCH"
+
+          VERSION=$VERSION MACOS_SHA=$MACOS_SHA LINUX_SHA=$LINUX_SHA python3 << 'PYEOF'
+          import re, os
+          content = open('Formula/paige.rb').read()
+          content = re.sub(r'version "[^"]*"', f'version "{os.environ["VERSION"]}"', content)
+          shas = iter([os.environ['MACOS_SHA'], os.environ['LINUX_SHA']])
+          content = re.sub(r'sha256 "[a-f0-9]*"', lambda m: f'sha256 "{next(shas)}"', content)
+          open('Formula/paige.rb', 'w').write(content)
+          PYEOF
+
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add Formula/paige.rb
+          if git diff --staged --quiet; then
+            exit 0
+          fi
+          git commit -m "bump paige to ${VERSION}"
+          git push --force-with-lease origin "$BRANCH"
+          if [ -z "$PR_STATE" ]; then
+            GH_TOKEN="${HOMEBREW_TAP_TOKEN}" gh pr create --repo ymauray/homebrew-tap --base main --head "$BRANCH" --title "bump paige to ${VERSION}" --body "Automated release update for ${RELEASE_TAG}."
+          fi
+
+      - name: Update Scoop bucket
+        env:
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+        run: |
+          VERSION=${RELEASE_TAG#v}
+          WIN_SHA=$(curl -sL "https://github.com/ymauray/paige/releases/download/${RELEASE_TAG}/paige-win-x64.zip" | sha256sum | cut -d' ' -f1)
+
+          git clone "https://x-access-token:${SCOOP_BUCKET_TOKEN}@github.com/ymauray/scoop-bucket.git" scoop
+          cd scoop
+          BRANCH="automation/paige/${RELEASE_TAG}"
+          PR_STATE=$(GH_TOKEN="${SCOOP_BUCKET_TOKEN}" gh pr list --repo ymauray/scoop-bucket --head "$BRANCH" --state all --json state --jq '.[0].state // empty')
+          if [ "$PR_STATE" = "CLOSED" ]; then
+            echo "The Scoop pull request for ${RELEASE_TAG} was closed without merging."
+            exit 1
+          fi
+          git checkout -B "$BRANCH"
+
+          VERSION=$VERSION WIN_SHA=$WIN_SHA python3 -c "
+          import json, os
+          v = os.environ['VERSION']
+          m = json.load(open('paige.json'))
+          m['version'] = v
+          m['architecture']['64bit']['url'] = 'https://github.com/ymauray/paige/releases/download/v' + v + '/paige-win-x64.zip'
+          m['architecture']['64bit']['hash'] = 'sha256:' + os.environ['WIN_SHA']
+          open('paige.json', 'w').write(json.dumps(m, indent=4) + '\n')
+          "
+
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add paige.json
+          if git diff --staged --quiet; then
+            exit 0
+          fi
+          git commit -m "bump paige to ${VERSION}"
+          git push --force-with-lease origin "$BRANCH"
+          if [ -z "$PR_STATE" ]; then
+            GH_TOKEN="${SCOOP_BUCKET_TOKEN}" gh pr create --repo ymauray/scoop-bucket --base main --head "$BRANCH" --title "bump paige to ${VERSION}" --body "Automated release update for ${RELEASE_TAG}."
+          fi
+```
+
+===== [repocheck] CLAUDE.md (TOOL-01 : doit importer @AGENTS.md) =====
+
+(absent)
+
+AGENTS.md : absent de la racine
+
+===== [repocheck] dependabot.yml =====
+
+version: 2
+updates:
+  # Surveiller les dépendances NuGet
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      dotnet-dependencies:
+        patterns:
+          - "*"
+
+  # Surveiller les mises à jour des GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+===== [repocheck] Protection de branche classique (main) =====
+
+ÉCHEC HTTP 404 : {"message":"Branch not protected","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-branch-protection","status":"404"}gh: Branch not protected (HTTP 404)
+
+===== [repocheck] Règles effectives sur main (rulesets inclus) =====
+
+[]
+
+===== [repocheck] Rulesets du dépôt =====
+
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Permissions par défaut des workflows =====
+
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
+
+===== [repocheck] Dependabot alerts (vulnerability-alerts : succès = activées, 404 = désactivées) =====
+
+ÉCHEC HTTP 404 : {"message":"Vulnerability alerts are disabled.","documentation_url":"https://docs.github.com/rest/repos/repos#check-if-vulnerability-alerts-are-enabled-for-a-repository","status":"404"}gh: Vulnerability alerts are disabled. (HTTP 404)
+
+===== [repocheck] Dependabot security updates (automated-security-fixes) =====
+
+{"enabled":false,"paused":false}
+
+===== [repocheck] Signalement privé de vulnérabilités =====
+
+{"enabled":false}
+
+===== [repocheck] Tags (100 premiers) =====
+
+v0.0.1	sur main
+
+===== [repocheck] Releases (10 dernières) =====
+
+v0.0.1	v0.0.1	2026-05-01T10:02:52Z	prerelease=false
+
+===== [repocheck] GitHub Pages =====
+
+ÉCHEC HTTP 404 : {"message":"Not Found","documentation_url":"https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site","status":"404"}gh: Not Found (HTTP 404)
+
+===== [repocheck] Checks du dernier commit de main (noms utilisables comme required status checks) =====
+
+build	success	app=github-actions
+(succès, réponse vide ou liste vide)
+
+===== [repocheck] Fin de collecte =====
+

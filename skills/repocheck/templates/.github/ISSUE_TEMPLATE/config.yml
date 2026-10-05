@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  # repocheck: garder ce lien seulement si les Discussions sont activées
+  - name: Questions et échanges
+    url: https://github.com/{{REPO}}/discussions
+    about: Pour une question ou une idée, utilisez les Discussions.
