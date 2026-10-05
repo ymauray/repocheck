@@ -1,0 +1,9 @@
+# Réglages locaux de Claude Code
+.claude/settings.local.json
+
+# Fichiers système et d'éditeur
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
