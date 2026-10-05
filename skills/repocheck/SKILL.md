@@ -88,6 +88,10 @@ Demander brièvement à l'utilisateur si une évaluation ou une proposition lui 
 1. est consignée dans le journal et dans `RETOURS.md` ;
 2. donne lieu, si l'utilisateur le souhaite, à une proposition de modification du référentiel **dans le dépôt source du plugin** (pas dans la copie installée), en incrémentant sa version : correctif → `x.y.Z`, nouvelle règle ou règle modifiée → `x.Y.0`.
 
+## 8. Livrer le journal
+
+Si le dossier du journal se trouve dans un dépôt Git dont la branche par défaut est protégée, livrer les fichiers de l'exécution par une PR, en suivant « Livraison du journal » dans `references/journal.md`. Cette étape vaut pour tous les modes, audit seul compris.
+
 ## Création d'un dépôt
 
 1. Demander le nom, la description, la visibilité, la licence et le langage.
