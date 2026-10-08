@@ -93,7 +93,7 @@ Une fois les décisions prises, calculer le **score attendu** avec `scripts/scor
 ## 5. Appliquer (actions validées uniquement)
 
 - **API** : relever l'état « avant », exécuter, relever l'état « après », puis consigner les trois avec la commande de retour arrière, **action par action et immédiatement**.
-- **PR** : suivre « Mise en œuvre d'une PR » dans `references/remediation.md` : clone dans le scratchpad, un commit par pratique, PR non mergée. `AUDIT.md` fait l'avant-dernier commit, le badge le **dernier**, tous deux avec le score attendu.
+- **PR** : suivre « Mise en œuvre d'une PR » dans `references/remediation.md` : clone dans le scratchpad, un commit par pratique, PR non mergée. `AUDIT.md`, généré par `scripts/audit-md.sh`, fait l'avant-dernier commit, le badge le **dernier**, tous deux avec le score attendu.
 - En cas d'échec : consigner l'erreur, ne pas improviser de contournement, continuer avec les actions indépendantes et signaler l'échec dans le résumé.
 
 ## 6. Vérifier

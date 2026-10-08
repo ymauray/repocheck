@@ -69,3 +69,7 @@
 ### Résultat de l'audit dans le dépôt audité
 - **Constat** : le résultat d'un audit n'est lisible que dans le journal local, hors du dépôt.
 - **Décision** (2026-10-08, utilisateur) : à chaque mise en conformité (pas pour un audit seul, qui ne modifie rien), le skill propose un `AUDIT.md` à la racine du dépôt audité (date, version du référentiel, score, tableau code / description / criticité / résultat), sans historique. Il part par une PR non mergée, avec le score attendu comme le badge, NA compris. Ce n'est pas une pratique : le référentiel et le score ne changent pas. Plugin 0.9.0.
+
+### AUDIT.md généré par un script, avec légende des criticités
+- **Constat** : `AUDIT.md` n'avait pas de modèle, donc sa structure dépendait de la rédaction du modèle. Le tableau affiche des pastilles (🔴 🟠 🟡 ⚪) sans dire ce qu'elles signifient ni ce qu'elles pèsent dans le score.
+- **Décision** (2026-10-08, utilisateur) : le fichier est produit par `scripts/audit-md.sh`, qui lit le référentiel et réutilise `score.sh`. Il ajoute une légende (criticité, niveau, poids) reprise de la ligne « Criticité et poids dans le score » du référentiel, plus une phrase sur le calcul. Le référentiel et le score ne changent pas. Plugin 0.10.0.

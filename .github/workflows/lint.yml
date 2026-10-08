@@ -33,5 +33,15 @@ jobs:
             | bash skills/repocheck/scripts/score.sh | tee score.txt
           grep -qx 'Score : 100/100' score.txt
 
+      # AUDIT.md doit contenir la légende (4 criticités) et une ligne par pratique.
+      - name: Auto-test d'AUDIT.md
+        run: |
+          grep -oE '^\| [A-Z]+-[0-9]+ \|' skills/repocheck/references/BONNES-PRATIQUES.md \
+            | tr -d '| ' | sed 's/$/ OK/' > statuts.txt
+          bash skills/repocheck/scripts/audit-md.sh 2026-01-01 statuts.txt > AUDIT.md
+          test "$(grep -cE '^\| [A-Z]+-[0-9]+ \|' AUDIT.md)" -eq "$(wc -l < statuts.txt)"
+          test "$(grep -cE '^\| (🔴|🟠|🟡|⚪) \|' AUDIT.md)" -eq 4
+          grep -qx -- '- \*\*Score\*\* : 100/100' AUDIT.md
+
       - name: Manifestes JSON
         run: for f in .claude-plugin/*.json; do python3 -m json.tool "$f" > /dev/null; done

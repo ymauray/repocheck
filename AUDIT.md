@@ -4,6 +4,15 @@
 - **Référentiel** : 1.3.0
 - **Score** : 100/100
 
+| Criticité | Niveau | Poids dans le score |
+|---|---|---|
+| 🔴 | Haute | 4 |
+| 🟠 | Moyenne | 2 |
+| 🟡 | Faible | 1 |
+| ⚪ | Optionnelle | 0,5 |
+
+Le score est la somme des poids des pratiques `OK` divisée par celle des pratiques `OK` et `KO`, sur 100. Les `NA` sont exclus du calcul.
+
 | Code | Description | Criticité | Résultat |
 |---|---|---|---|
 | META-01 | Description du dépôt renseignée | 🟡 | OK |

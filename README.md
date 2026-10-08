@@ -20,6 +20,7 @@ skills/repocheck/
   scripts/
     collect.sh           collecte des signaux via gh api (lecture seule)
     score.sh             calcul du score, poids lus dans le référentiel
+    audit-md.sh          génération d'AUDIT.md (légende des criticités comprise)
   templates/             modèles de fichiers communautaires
 docs/RETOURS.md          décisions sur le référentiel et le skill
 docs/archives/           référentiel d'origine, avant nettoyage
@@ -90,13 +91,14 @@ Les scripts sont aussi utilisables seuls :
 ```sh
 bash skills/repocheck/scripts/collect.sh owner/repo > collecte.txt
 bash skills/repocheck/scripts/score.sh statuts.txt   # une ligne « ID OK|KO|NA » par pratique
+bash skills/repocheck/scripts/audit-md.sh 2026-10-08 statuts.txt > AUDIT.md
 ```
 
 ## Intégration continue et releases
 
 Tout passe par GitHub Actions ; aucun outil externe n'intervient.
 
-- **Lint** (`.github/workflows/lint.yml`), sur chaque PR et chaque push sur `main` : `bash -n` et `shellcheck` sur les scripts, auto-test de `score.sh` (toutes les pratiques du référentiel notées OK doivent donner 100/100, ce qui vérifie que chaque ligne du tableau est lisible), validité JSON des manifestes. C'est le check requis pour merger sur `main`.
+- **Lint** (`.github/workflows/lint.yml`), sur chaque PR et chaque push sur `main` : `bash -n` et `shellcheck` sur les scripts, auto-test de `score.sh` et de `audit-md.sh` (toutes les pratiques du référentiel notées OK doivent donner 100/100, ce qui vérifie que chaque ligne du tableau est lisible), validité JSON des manifestes. C'est le check requis pour merger sur `main`.
 - **Release** (`.github/workflows/release.yml`), sur chaque push sur `main` : lit `version` dans `.claude-plugin/plugin.json` et, si le tag `vX.Y.Z` n'existe pas encore, crée le tag et la release GitHub (notes générées). Pour publier une version, il suffit donc d'incrémenter `version` dans la PR.
 - **Dependabot** tient à jour les actions utilisées par les workflows.
 
@@ -116,7 +118,7 @@ Les poids sont : 🔴 4 · 🟠 2 · 🟡 1 · ⚪ 0,5. Le score vaut poids OK �
 
 ### AUDIT.md
 
-À chaque mise en conformité (pas pour un audit seul), le skill propose d'ajouter à la racine du dépôt audité un fichier `AUDIT.md` : date, version du référentiel, score, puis un tableau code, description, criticité, résultat pour chaque pratique. Il remplace le précédent, git garde l'historique. Il part dans la même PR que le badge, avec le score attendu, et n'entre pas dans le score. Le format est décrit dans `remediation.md`.
+À chaque mise en conformité (pas pour un audit seul), le skill propose d'ajouter à la racine du dépôt audité un fichier `AUDIT.md` : date, version du référentiel, score, légende des criticités et de leurs poids, puis un tableau code, description, criticité, résultat pour chaque pratique. Il remplace le précédent, git garde l'historique. Il part dans la même PR que le badge, avec le score attendu, et n'entre pas dans le score. Il est généré par `scripts/audit-md.sh`, et son format est décrit dans `remediation.md`.
 
 ### Badge
 
