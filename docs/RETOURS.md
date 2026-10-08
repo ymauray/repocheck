@@ -63,3 +63,9 @@
 ### Le journal quitte le dépôt repocheck
 - **Constat** : versionner le journal dans repocheck impose une PR par exécution et de lancer le skill depuis ce dossier.
 - **Décision** (2026-10-05, utilisateur) : le journal reste en local, dans le dossier donné par `REPOCHECK_JOURNAL` (demandé à l'utilisateur s'il n'est pas défini). Suppression de l'étape 8 « Livrer le journal ». `RETOURS.md` passe dans `docs/` ; le skill ne l'alimente plus et ne propose plus de lui-même de modifier le référentiel : l'utilisateur le demande explicitement. Plugin 0.8.0.
+
+## 2026-10-08 — AUDIT.md
+
+### Résultat de l'audit dans le dépôt audité
+- **Constat** : le résultat d'un audit n'est lisible que dans le journal local, hors du dépôt.
+- **Décision** (2026-10-08, utilisateur) : à chaque mise en conformité (pas pour un audit seul, qui ne modifie rien), le skill propose un `AUDIT.md` à la racine du dépôt audité (date, version du référentiel, score, tableau code / description / criticité / résultat), sans historique. Il part par une PR non mergée, avec le score attendu comme le badge, NA compris. Ce n'est pas une pratique : le référentiel et le score ne changent pas. Plugin 0.9.0.
