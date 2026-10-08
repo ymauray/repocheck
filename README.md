@@ -114,6 +114,10 @@ Le référentiel est versionné (en tête de `BONNES-PRATIQUES.md`), et chaque j
 
 Les poids sont : 🔴 4 · 🟠 2 · 🟡 1 · ⚪ 0,5. Le score vaut poids OK ÷ (poids OK + poids KO) × 100 ; les `NA` sont exclus. Une dérogation acceptée reste `KO` : elle n'améliore pas le score, mais l'action n'est plus proposée.
 
+### AUDIT.md
+
+À chaque mise en conformité (pas pour un audit seul), le skill propose d'ajouter à la racine du dépôt audité un fichier `AUDIT.md` : date, version du référentiel, score, puis un tableau code, description, criticité, résultat pour chaque pratique. Il remplace le précédent, git garde l'historique. Il part dans la même PR que le badge, avec le score attendu, et n'entre pas dans le score. Le format est décrit dans `remediation.md`.
+
 ### Badge
 
 La mise en conformité propose d'ajouter au README du dépôt audité un badge statique qui affiche la version du référentiel et le score, et qui renvoie vers ce dépôt :

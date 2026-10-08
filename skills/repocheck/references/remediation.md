@@ -142,6 +142,36 @@ Encodage dans l'URL : espace → `%20`, `/` → `%2F`, et tout `-` du texte doub
 
 Si aucune autre action PR n'est prévue, le badge fait l'objet d'une PR à lui seul, intitulée « Badge repocheck (<date>) ».
 
+## AUDIT.md
+
+Fonctionnalité du skill, pas une pratique : le fichier n'entre pas dans le score. Il porte le résultat de l'audit le plus récent, à la racine du dépôt audité. Pas d'historique : git le garde. Il est proposé à chaque mise en conformité, et part dans la PR. Un audit seul ou en lot ne le crée ni ne le met à jour.
+
+```markdown
+# Audit repocheck
+
+- **Date** : <AAAA-MM-JJ>
+- **Référentiel** : <version>
+- **Score** : <score>/100
+
+| Code | Description | Criticité | Résultat |
+|---|---|---|---|
+| META-01 | Description du dépôt renseignée | 🟡 | OK |
+```
+
+- Une ligne par pratique du référentiel, NA compris, dans l'ordre du référentiel.
+- `Description` reprend la colonne « Pratique » de `BONNES-PRATIQUES.md`, `Criticité` son emoji. `Résultat` vaut `OK`, `KO` ou `NA`.
+- `Score` est le **score attendu** (étape 4 du skill), comme pour le badge, et `Résultat` l'état attendu une fois les actions validées appliquées. Les résultats d'une action refusée ou en échec restent `KO`.
+- `Date` est celle de l'audit.
+
+**Mise en œuvre** (type PR, commit `chore(repocheck): AUDIT.md — <score>/100 (référentiel <version>)`, juste avant le badge) :
+
+- fichier présent : le remplacer en entier, sans rien conserver de l'ancien contenu ;
+- fichier absent : le créer.
+
+Si aucune autre action PR n'est prévue, il fait l'objet d'une PR à lui seul, intitulée « AUDIT.md repocheck (<date>) ». Un refus de l'utilisateur est consigné dans le journal, sans dérogation.
+
+**Repérage** : le fichier est à jour si sa date, sa version de référentiel et son score correspondent à l'audit en cours et si chaque résultat correspond à l'évaluation. Sinon, proposer de le régénérer.
+
 ## Mise en œuvre d'une PR
 
 1. Cloner dans le scratchpad : `gh repo clone $R <scratchpad>/<repo>`.
