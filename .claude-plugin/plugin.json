@@ -1,6 +1,6 @@
 {
   "name": "repocheck",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Audit de conformité des dépôts GitHub à un référentiel de bonnes pratiques, plan d'action, mise en œuvre validée et journal de traçabilité.",
   "author": {
     "name": "ymauray"

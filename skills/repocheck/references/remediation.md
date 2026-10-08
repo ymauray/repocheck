@@ -153,13 +153,25 @@ Fonctionnalité du skill, pas une pratique : le fichier n'entre pas dans le scor
 - **Référentiel** : <version>
 - **Score** : <score>/100
 
+| Criticité | Niveau | Poids dans le score |
+|---|---|---|
+| 🔴 | Haute | 4 |
+| 🟠 | Moyenne | 2 |
+| 🟡 | Faible | 1 |
+| ⚪ | Optionnelle | 0,5 |
+
+Le score est la somme des poids des pratiques `OK` divisée par celle des pratiques `OK` et `KO`, sur 100. Les `NA` sont exclus du calcul.
+
 | Code | Description | Criticité | Résultat |
 |---|---|---|---|
 | META-01 | Description du dépôt renseignée | 🟡 | OK |
 ```
 
+Le fichier se génère avec `scripts/audit-md.sh <AAAA-MM-JJ> <fichier de statuts>` (même entrée que `score.sh`) : ne jamais l'écrire à la main. Le script lit la version, la légende, les descriptions et les criticités dans le référentiel, calcule le score avec `score.sh` et refuse une liste incomplète.
+
 - Une ligne par pratique du référentiel, NA compris, dans l'ordre du référentiel.
 - `Description` reprend la colonne « Pratique » de `BONNES-PRATIQUES.md`, `Criticité` son emoji. `Résultat` vaut `OK`, `KO` ou `NA`.
+- La légende des criticités et de leurs poids est reprise de la ligne « Criticité et poids dans le score » du référentiel.
 - `Score` est le **score attendu** (étape 4 du skill), comme pour le badge, et `Résultat` l'état attendu une fois les actions validées appliquées. Les résultats d'une action refusée ou en échec restent `KO`.
 - `Date` est celle de l'audit.
 
